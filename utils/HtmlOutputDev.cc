@@ -135,7 +135,7 @@ void HtmlString::addChar(GfxState *state, double x, double y,
     xMin = x;
   }
   xMax = xRight[len] = x + dx;
-//printf("added char: %f %f xright = %f\n", x, dx, x+dx);
+  //printf("added char: %f %f xright = %f\n", x, dx, x+dx);
   ++len;
 }
 
@@ -246,6 +246,16 @@ void HtmlPage::conv(){
 }
 
 
+GBool HtmlPage::isSuperscript(HtmlString *s1, HtmlString *s2) {
+  if ( getFont(s2)->getSize() >= getFont(s1)->getSize() ) return gFalse;
+  return ( s1->yMin > s2->yMin ) && yOverlap(s1,s2);
+}
+GBool HtmlPage::yOverlap(HtmlString *s1, HtmlString *s2) {
+  if (s1->yMin > s2->yMax) return gFalse;
+  if (s1->yMax < s2->yMin) return gFalse;
+  return gTrue;
+}
+
 void HtmlPage::addChar(GfxState *state, double x, double y,
 		       double dx, double dy, 
 			double ox, double oy, Unicode *u, int uLen) {
@@ -309,16 +319,20 @@ void HtmlPage::endString() {
     p2 = NULL;
   } else if ((!yxCur1 ||
               (y1 >= yxCur1->yMin &&
-               (y2 >= yxCur1->yMax || curStr->xMax >= yxCur1->xMin))) &&
+               (y2 >= yxCur1->yMax || curStr->xMin >= yxCur1->xMin))) &&
              (!yxCur2 ||
               (y1 < yxCur2->yMin ||
                (y2 < yxCur2->yMax && curStr->xMax < yxCur2->xMin)))) {
     p1 = yxCur1;
     p2 = yxCur2;
   } else {
+    //printf("reordering('%s')...\n%d (yMin),%d (yMax),%d(xMin),%d(xMax)\n",curStr->htext->getCString(),(int)curStr->yMin,(int)curStr->yMax,(int)curStr->xMin,(int)curStr->xMax);
     for (p1 = NULL, p2 = yxStrings; p2; p1 = p2, p2 = p2->yxNext) {
-      if (y1 < p2->yMin || (y2 < p2->yMax && curStr->xMax < p2->xMin))
+      //printf("before... %d (yMin),%d (yMax),%d (xMin)?\t",(int)p2->yMin,(int)p2->yMax,(int)p2->xMin);
+      if (curStr->yMax < p2->yMin || (yOverlap(curStr,p2) && curStr->xMin < p2->xMin)) {
+      //if (y1 < p2->yMin || (y2 < p2->yMax && curStr->xMax < p2->xMin)) {
         break;
+      }
     }
     yxCur2 = p2;
   }
@@ -335,9 +349,10 @@ void HtmlPage::coalesce() {
   HtmlString *str1, *str2;
   HtmlFont *hfont1, *hfont2;
   double space, horSpace, vertSpace, vertOverlap;
-  GBool addSpace, addLineBreak;
+  GBool addSpace, addLineBreak, superscript;
   int n, i;
   double curX, curY;
+
 
 #if 0 //~ for debugging
   for (str1 = yxStrings; str1; str1 = str1->yxNext) {
@@ -351,6 +366,7 @@ void HtmlPage::coalesce() {
   }
   printf("\n------------------------------------------------------------\n\n");
 #endif
+
   str1 = yxStrings;
 
   if( !str1 ) return;
@@ -407,51 +423,55 @@ void HtmlPage::coalesce() {
   }
   curX = str1->xMin; curY = str1->yMin;
 
+  // Join strings that look like they're on the same line
+  superscript = gFalse;
   while (str1 && (str2 = str1->yxNext)) {
     hfont2 = getFont(str2);
-    space = str1->yMax - str1->yMin;
-    horSpace = str2->xMin - str1->xMax;
-    addLineBreak = !noMerge && (fabs(str1->xMin - str2->xMin) < 0.4);
+    space = str1->yMax - str1->yMin;  // why don't we use font size? ( hfont1->getSize() ) ?
+    horSpace = str2->xMin - str1->xMax;  // distance between end of str1 and beginning of str2
+    addLineBreak = !noMerge && (fabs(str1->xMin - str2->xMin) < 0.4);  // if xMin is a double, how could this ever be a float...?
     vertSpace = str2->yMin - str1->yMax;
 
-//printf("coalesce %d %d %f? ", str1->dir, str2->dir, d);
-
-    if (str2->yMin >= str1->yMin && str2->yMin <= str1->yMax)
-    {
-	vertOverlap = str1->yMax - str2->yMin;
-    } else
-    if (str2->yMax >= str1->yMin && str2->yMax <= str1->yMax)
-    {
-	vertOverlap = str2->yMax - str1->yMin;
-    } else
-    {
-    	vertOverlap = 0;
-    } 
-    
+    // Do we want to join str1 + str2? (don't join any strings if we're using raw ordering)
+    // printf("Min: %d,%d; Max: %d,%d; yOverlap: %b;\tvertSpace = %d; horSpace = %d; space = %d\n",(int)str1->yMin,(int)str2->yMin,(int)str1->yMax,(int)str2->yMax,(int)vertSpace,(int)horSpace,(int)space);
+    /* if (hfont1->getSize() != hfont2->getSize()) {
+	    printf("font change: %d -> %d (%0.2f)\n", (int)hfont1->getSize(), (int)hfont2->getSize(),
+		fabs(((double)(hfont1->getSize()) - (double)(hfont2->getSize()))/(double)(hfont1->getSize())) );
+    } */
     if (
-	(
-	 (
-	  (
-	   (rawOrder && vertOverlap > 0.5 * space) 
-	   ||
-	   (!rawOrder && str2->yMin < str1->yMax)
-	  ) &&
-	  (horSpace > -0.5 * space && horSpace < space)
-	 ) ||
-       	 (vertSpace >= 0 && vertSpace < 0.5 * space && addLineBreak)
-	) &&
-	(!complexMode || (hfont1->isEqualIgnoreBold(*hfont2))) && // in complex mode fonts must be the same, in other modes fonts do not metter
-	str1->dir == str2->dir // text direction the same
+        !rawOrder &&
+ 	( (
+	   ( yOverlap(str1,str2) ) && ( horSpace > -0.5 * space && horSpace < 3 * space ) // this should probably be a parameter
+	  ) ||
+       	   ( ( vertSpace >= 0 ) && ( vertSpace < 0.5 * space ) && addLineBreak )
+
+	) && ( 
+		!complexMode || // in complex mode fonts must be the same, in other modes fonts do not metter
+		//(hfont1->isEqualIgnoreBold(*hfont2) ) ||
+		(fabs(((double)(hfont1->getSize()) - (double)(hfont2->getSize()))/(double)(hfont1->getSize())) < 0.5 ) ||
+		( isSuperscript(str1,str2) ) || // look for superscript
+		( isSuperscript(str2,str1) ) || // footnotes starting w/ superscript...
+		superscript
+
+	) && ( str1->dir == str2->dir ) // text direction the same
        ) 
     {
-//      printf("yes\n");
       n = str1->len + str2->len;
-      if ((addSpace = horSpace > 0.1 * space)) {
-        ++n;
+      if (
+	   (addSpace = horSpace > 0.25 * space)
+      ) {
+	   /*  no need to add extra spaces... */
+	   if (
+		str1->htext && (str1->htext->getLength() > 0) &&
+		str2->htext && (str2->htext->getLength() > 0) &&
+
+		(str1->htext->getChar(str1->htext->getLength() - 1) != ' ') &&
+		(str2->htext->getChar(0) != ' ')
+
+	   ) { ++n; } else { addSpace = 0; }
       }
-      if (addLineBreak) {
-        ++n;
-      }
+
+      if (addLineBreak) { ++n; }
   
       str1->size = (n + 15) & ~15;
       str1->text = (Unicode *)grealloc(str1->text,
@@ -486,6 +506,8 @@ void HtmlPage::coalesce() {
 	      hfont2 = getFont(str2); 
 	  }
       }
+
+      // Append str2 text and xRight data to str1
       for (i = 0; i < str2->len; ++i) {
 	str1->text[str1->len] = str2->text[i];
 	str1->xRight[str1->len] = str2->xRight[i];
@@ -515,6 +537,34 @@ void HtmlPage::coalesce() {
 	}
       }
 
+      /* handle superscript / footnote references */
+      if (isSuperscript(str1,str2)) { // look for superscript
+        if(!stout && !globalParams->getErrQuiet()) printf("found footnote: '%s'\n",str2->htext->getCString());
+	if ((char)*(str2->htext->getCString()) == '*' or ((char)*(str2->htext->getCString()) >= '0' and (char)*(str2->htext->getCString()) <= '9')) {
+	  str2->htext->insert(0,GooString::format("<a id=\"fn{0:t}-backref\" href=\"#fn{0:t}\"><sup>",str2->htext));
+	  str2->htext->append("</sup></a>");
+	} else {
+	  str2->htext->insert(0,"<sup>");
+          str2->htext->append("</sup>");
+	}
+	superscript = gTrue;
+      } else {
+	superscript = gFalse;
+      }
+
+      // try to catch footnotes
+      if(isSuperscript(str2,str1) && str1->len < 5 ) {
+        if(!stout && !globalParams->getErrQuiet()) printf("found footnote: '%s'\n",str1->htext->getCString());
+	if ((char)*(str1->htext->getCString()) == '*' or ((char)*(str1->htext->getCString()) >= '0' and (char)*(str1->htext->getCString()) <= '9')) {
+	  str1->htext->insert(0,GooString::format("<a id=\"fn{0:t}\" href=\"#fn{0:t}-backref\"><sup>",str1->htext->getCString()));
+	  str1->htext->append("</sup></a>");
+	} else {
+	  str1->htext->insert(0,"<sup>");
+          str1->htext->append("</sup>");
+	}
+	str1->fontpos = str2->fontpos;
+      }
+
       str1->htext->append(str2->htext);
       // str1 now contains href for link of str2 (if it is defined)
       str1->link = str2->link; 
@@ -528,7 +578,6 @@ void HtmlPage::coalesce() {
       str1->yxNext = str2->yxNext;
       delete str2;
     } else { // keep strings separate
-//      printf("no\n"); 
       if( hfont1->isBold() )
 	str1->htext->append("</b>",4);
       if( hfont1->isItalic() )
