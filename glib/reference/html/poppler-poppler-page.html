@@ -1,0 +1,1391 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>PopplerPage</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.72.0">
+<link rel="start" href="index.html" title="Poppler Reference Manual">
+<link rel="up" href="ch01.html" title="Poppler">
+<link rel="prev" href="poppler-poppler-document.html" title="PopplerDocument">
+<link rel="next" href="poppler-poppler-action.html" title="poppler-action">
+<meta name="generator" content="GTK-Doc V1.8 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch01.html" title="Poppler">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="poppler-poppler-document.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">Poppler Reference Manual</th>
+<td><a accesskey="n" href="poppler-poppler-action.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#id345445" class="shortcut">Top</a>
+                  &#160;|&#160;
+                  <a href="#id373475" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="poppler-poppler-page"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2>
+<a name="id345445"></a><span class="refentrytitle">PopplerPage</span>
+</h2>
+<p>PopplerPage &#8212; Information about a page in a document</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<h2>Synopsis</h2>
+<pre class="synopsis">
+
+
+
+void                <a href="poppler-poppler-page.html#poppler-page-render">poppler_page_render</a>                 (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         cairo_t *cairo);
+void                <a href="poppler-poppler-page.html#poppler-page-render-to-pixbuf">poppler_page_render_to_pixbuf</a>       (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         int src_x,
+                                                         int src_y,
+                                                         int src_width,
+                                                         int src_height,
+                                                         double scale,
+                                                         int rotation,
+                                                         GdkPixbuf *pixbuf);
+void                <a href="poppler-poppler-page.html#poppler-page-get-size">poppler_page_get_size</a>               (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         double *width,
+                                                         double *height);
+int                 <a href="poppler-poppler-page.html#poppler-page-get-index">poppler_page_get_index</a>              (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page);
+GdkPixbuf*          <a href="poppler-poppler-page.html#poppler-page-get-thumbnail">poppler_page_get_thumbnail</a>          (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page);
+gboolean            <a href="poppler-poppler-page.html#poppler-page-get-thumbnail-size">poppler_page_get_thumbnail_size</a>     (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         int *width,
+                                                         int *height);
+void                <a href="poppler-poppler-page.html#poppler-page-render-to-ps">poppler_page_render_to_ps</a>           (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         <a href="poppler-poppler.html#PopplerPSFile">PopplerPSFile</a> *ps_file);
+GList*              <a href="poppler-poppler-page.html#poppler-page-find-text">poppler_page_find_text</a>              (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         const char *text);
+char*               <a href="poppler-poppler-page.html#poppler-page-get-text">poppler_page_get_text</a>               (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         <a href="poppler-poppler.html#PopplerSelectionStyle">PopplerSelectionStyle</a> style,
+                                                         <a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a> *rect);
+double              <a href="poppler-poppler-page.html#poppler-page-get-duration">poppler_page_get_duration</a>           (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page);
+<a href="poppler-poppler-page.html#PopplerPageTransition">PopplerPageTransition</a>* <a href="poppler-poppler-page.html#poppler-page-get-transition">poppler_page_get_transition</a>      (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page);
+GList*              <a href="poppler-poppler-page.html#poppler-page-get-link-mapping">poppler_page_get_link_mapping</a>       (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page);
+void                <a href="poppler-poppler-page.html#poppler-page-free-link-mapping">poppler_page_free_link_mapping</a>      (GList *list);
+GList*              <a href="poppler-poppler-page.html#poppler-page-get-image-mapping">poppler_page_get_image_mapping</a>      (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page);
+void                <a href="poppler-poppler-page.html#poppler-page-free-image-mapping">poppler_page_free_image_mapping</a>     (GList *list);
+GList*              <a href="poppler-poppler-page.html#poppler-page-get-form-field-mapping">poppler_page_get_form_field_mapping</a> (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page);
+void                <a href="poppler-poppler-page.html#poppler-page-free-form-field-mapping">poppler_page_free_form_field_mapping</a>
+                                                        (GList *list);
+GdkRegion*          <a href="poppler-poppler-page.html#poppler-page-get-selection-region">poppler_page_get_selection_region</a>   (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         gdouble scale,
+                                                         <a href="poppler-poppler.html#PopplerSelectionStyle">PopplerSelectionStyle</a> style,
+                                                         <a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a> *selection);
+void                <a href="poppler-poppler-page.html#poppler-page-render-selection">poppler_page_render_selection</a>       (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         cairo_t *cairo,
+                                                         <a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a> *selection,
+                                                         <a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a> *old_selection,
+                                                         <a href="poppler-poppler.html#PopplerSelectionStyle">PopplerSelectionStyle</a> style,
+                                                         GdkColor *glyph_color,
+                                                         GdkColor *background_color);
+void                <a href="poppler-poppler-page.html#poppler-page-render-selection-to-pixbuf">poppler_page_render_selection_to_pixbuf</a>
+                                                        (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         gdouble scale,
+                                                         int rotation,
+                                                         GdkPixbuf *pixbuf,
+                                                         <a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a> *selection,
+                                                         <a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a> *old_selection,
+                                                         <a href="poppler-poppler.html#PopplerSelectionStyle">PopplerSelectionStyle</a> style,
+                                                         GdkColor *glyph_color,
+                                                         GdkColor *background_color);
+#define             <a href="poppler-poppler-page.html#POPPLER-TYPE-RECTANGLE:CAPS">POPPLER_TYPE_RECTANGLE</a>
+                    <a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a>;
+GType               <a href="poppler-poppler-page.html#poppler-rectangle-get-type">poppler_rectangle_get_type</a>          (void);
+<a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a>*   <a href="poppler-poppler-page.html#poppler-rectangle-new">poppler_rectangle_new</a>               (void);
+<a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a>*   <a href="poppler-poppler-page.html#poppler-rectangle-copy">poppler_rectangle_copy</a>              (<a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a> *rectangle);
+void                <a href="poppler-poppler-page.html#poppler-rectangle-free">poppler_rectangle_free</a>              (<a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a> *rectangle);
+#define             <a href="poppler-poppler-page.html#POPPLER-TYPE-PAGE-TRANSITION:CAPS">POPPLER_TYPE_PAGE_TRANSITION</a>
+                    <a href="poppler-poppler-page.html#PopplerPageTransition">PopplerPageTransition</a>;
+GType               <a href="poppler-poppler-page.html#poppler-page-transition-get-type">poppler_page_transition_get_type</a>    (void);
+<a href="poppler-poppler-page.html#PopplerPageTransition">PopplerPageTransition</a>* <a href="poppler-poppler-page.html#poppler-page-transition-new">poppler_page_transition_new</a>      (void);
+<a href="poppler-poppler-page.html#PopplerPageTransition">PopplerPageTransition</a>* <a href="poppler-poppler-page.html#poppler-page-transition-copy">poppler_page_transition_copy</a>     (<a href="poppler-poppler-page.html#PopplerPageTransition">PopplerPageTransition</a> *transition);
+void                <a href="poppler-poppler-page.html#poppler-page-transition-free">poppler_page_transition_free</a>        (<a href="poppler-poppler-page.html#PopplerPageTransition">PopplerPageTransition</a> *transition);
+#define             <a href="poppler-poppler-page.html#POPPLER-TYPE-LINK-MAPPING:CAPS">POPPLER_TYPE_LINK_MAPPING</a>
+                    <a href="poppler-poppler.html#PopplerLinkMapping">PopplerLinkMapping</a>;
+GType               <a href="poppler-poppler-page.html#poppler-link-mapping-get-type">poppler_link_mapping_get_type</a>       (void);
+<a href="poppler-poppler.html#PopplerLinkMapping">PopplerLinkMapping</a>* <a href="poppler-poppler-page.html#poppler-link-mapping-new">poppler_link_mapping_new</a>            (void);
+<a href="poppler-poppler.html#PopplerLinkMapping">PopplerLinkMapping</a>* <a href="poppler-poppler-page.html#poppler-link-mapping-copy">poppler_link_mapping_copy</a>           (<a href="poppler-poppler.html#PopplerLinkMapping">PopplerLinkMapping</a> *mapping);
+void                <a href="poppler-poppler-page.html#poppler-link-mapping-free">poppler_link_mapping_free</a>           (<a href="poppler-poppler.html#PopplerLinkMapping">PopplerLinkMapping</a> *mapping);
+#define             <a href="poppler-poppler-page.html#POPPLER-TYPE-IMAGE-MAPPING:CAPS">POPPLER_TYPE_IMAGE_MAPPING</a>
+                    <a href="poppler-poppler-page.html#PopplerImageMapping">PopplerImageMapping</a>;
+GType               <a href="poppler-poppler-page.html#poppler-image-mapping-get-type">poppler_image_mapping_get_type</a>      (void);
+<a href="poppler-poppler-page.html#PopplerImageMapping">PopplerImageMapping</a>* <a href="poppler-poppler-page.html#poppler-image-mapping-new">poppler_image_mapping_new</a>          (void);
+<a href="poppler-poppler-page.html#PopplerImageMapping">PopplerImageMapping</a>* <a href="poppler-poppler-page.html#poppler-image-mapping-copy">poppler_image_mapping_copy</a>         (<a href="poppler-poppler-page.html#PopplerImageMapping">PopplerImageMapping</a> *mapping);
+void                <a href="poppler-poppler-page.html#poppler-image-mapping-free">poppler_image_mapping_free</a>          (<a href="poppler-poppler-page.html#PopplerImageMapping">PopplerImageMapping</a> *mapping);
+#define             <a href="poppler-poppler-page.html#POPPLER-TYPE-FORM-FIELD-MAPPING:CAPS">POPPLER_TYPE_FORM_FIELD_MAPPING</a>
+                    <a href="poppler-poppler-page.html#PopplerFormFieldMapping">PopplerFormFieldMapping</a>;
+GType               <a href="poppler-poppler-page.html#poppler-form-field-mapping-get-type">poppler_form_field_mapping_get_type</a> (void);
+<a href="poppler-poppler-page.html#PopplerFormFieldMapping">PopplerFormFieldMapping</a>* <a href="poppler-poppler-page.html#poppler-form-field-mapping-new">poppler_form_field_mapping_new</a> (void);
+<a href="poppler-poppler-page.html#PopplerFormFieldMapping">PopplerFormFieldMapping</a>* <a href="poppler-poppler-page.html#poppler-form-field-mapping-copy">poppler_form_field_mapping_copy</a>
+                                                        (<a href="poppler-poppler-page.html#PopplerFormFieldMapping">PopplerFormFieldMapping</a> *mapping);
+void                <a href="poppler-poppler-page.html#poppler-form-field-mapping-free">poppler_form_field_mapping_free</a>     (<a href="poppler-poppler-page.html#PopplerFormFieldMapping">PopplerFormFieldMapping</a> *mapping);
+
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id373475"></a><h2>Description</h2>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id373491"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="id373502"></a><h3>
+<a name="poppler-page-render"></a>poppler_page_render ()</h3>
+<a class="indexterm" name="id373514"></a><pre class="programlisting">void                poppler_page_render                 (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         cairo_t *cairo);</pre>
+<p>
+Render the page to the given cairo context.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> the page to render from
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>cairo</code></em>&#160;:</span></td>
+<td> cairo context to render to
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id373583"></a><h3>
+<a name="poppler-page-render-to-pixbuf"></a>poppler_page_render_to_pixbuf ()</h3>
+<a class="indexterm" name="id373595"></a><pre class="programlisting">void                poppler_page_render_to_pixbuf       (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         int src_x,
+                                                         int src_y,
+                                                         int src_width,
+                                                         int src_height,
+                                                         double scale,
+                                                         int rotation,
+                                                         GdkPixbuf *pixbuf);</pre>
+<p>
+First scale the document to match the specified pixels per point,
+then render the rectangle given by the upper left corner at
+(src_x, src_y) and src_width and src_height.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> the page to render from
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>src_x</code></em>&#160;:</span></td>
+<td> x coordinate of upper left corner  
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>src_y</code></em>&#160;:</span></td>
+<td> y coordinate of upper left corner  
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>src_width</code></em>&#160;:</span></td>
+<td> width of rectangle to render  
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>src_height</code></em>&#160;:</span></td>
+<td> height of rectangle to render
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>scale</code></em>&#160;:</span></td>
+<td> scale specified as pixels per point
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>rotation</code></em>&#160;:</span></td>
+<td> rotate the document by the specified degree
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>pixbuf</code></em>&#160;:</span></td>
+<td> pixbuf to render into
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id373790"></a><h3>
+<a name="poppler-page-get-size"></a>poppler_page_get_size ()</h3>
+<a class="indexterm" name="id373802"></a><pre class="programlisting">void                poppler_page_get_size               (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         double *width,
+                                                         double *height);</pre>
+<p>
+Gets the size of <em class="parameter"><code>page</code></em> at the current scale and rotation.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> A <a href="poppler-poppler.html#PopplerPage"><span class="type">PopplerPage</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>width</code></em>&#160;:</span></td>
+<td> return location for the width of <em class="parameter"><code>page</code></em>
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>height</code></em>&#160;:</span></td>
+<td> return location for the height of <em class="parameter"><code>page</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id373918"></a><h3>
+<a name="poppler-page-get-index"></a>poppler_page_get_index ()</h3>
+<a class="indexterm" name="id373930"></a><pre class="programlisting">int                 poppler_page_get_index              (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page);</pre>
+<p>
+Returns the index of <em class="parameter"><code>page</code></em></p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> a <a href="poppler-poppler.html#PopplerPage"><span class="type">PopplerPage</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> index value of <em class="parameter"><code>page</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id374007"></a><h3>
+<a name="poppler-page-get-thumbnail"></a>poppler_page_get_thumbnail ()</h3>
+<a class="indexterm" name="id374019"></a><pre class="programlisting">GdkPixbuf*          poppler_page_get_thumbnail          (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page);</pre>
+<p>
+Get the embedded thumbnail for the specified page.  If the document
+doesn't have an embedded thumbnail for the page, this function
+returns <code class="literal">NULL</code>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> the <span class="type">PopperPage</span> to get the thumbnail for
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> the tumbnail as a <span class="type">GdkPixbuf</span> or <code class="literal">NULL</code> if the document
+doesn't have a thumbnail for this page.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id374085"></a><h3>
+<a name="poppler-page-get-thumbnail-size"></a>poppler_page_get_thumbnail_size ()</h3>
+<a class="indexterm" name="id374096"></a><pre class="programlisting">gboolean            poppler_page_get_thumbnail_size     (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         int *width,
+                                                         int *height);</pre>
+<p>
+Returns <code class="literal">TRUE</code> if <em class="parameter"><code>page</code></em> has a thumbnail associated with it.  It also
+fills in <em class="parameter"><code>width</code></em> and <em class="parameter"><code>height</code></em> with the width and height of the
+thumbnail.  The values of width and height are not changed if no
+appropriate thumbnail exists.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> A <a href="poppler-poppler.html#PopplerPage"><span class="type">PopplerPage</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>width</code></em>&#160;:</span></td>
+<td> return location for width
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>height</code></em>&#160;:</span></td>
+<td> return location for height
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> <code class="literal">TRUE</code>, if <em class="parameter"><code>page</code></em> has a thumbnail associated with it.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id374230"></a><h3>
+<a name="poppler-page-render-to-ps"></a>poppler_page_render_to_ps ()</h3>
+<a class="indexterm" name="id374241"></a><pre class="programlisting">void                poppler_page_render_to_ps           (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         <a href="poppler-poppler.html#PopplerPSFile">PopplerPSFile</a> *ps_file);</pre>
+<p>
+Render the page on a postscript file</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> a <a href="poppler-poppler.html#PopplerPage"><span class="type">PopplerPage</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ps_file</code></em>&#160;:</span></td>
+<td> the PopplerPSFile to render to
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id374308"></a><h3>
+<a name="poppler-page-find-text"></a>poppler_page_find_text ()</h3>
+<a class="indexterm" name="id374319"></a><pre class="programlisting">GList*              poppler_page_find_text              (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         const char *text);</pre>
+<p>
+A <span class="type">GList</span> of rectangles for each occurance of the text on the page.
+The coordinates are in PDF points.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> a <a href="poppler-poppler.html#PopplerPage"><span class="type">PopplerPage</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>text</code></em>&#160;:</span></td>
+<td> the text to search for (UTF-8 encoded)
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> a <span class="type">GList</span> of PopplerRectangle, 
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id374410"></a><h3>
+<a name="poppler-page-get-text"></a>poppler_page_get_text ()</h3>
+<a class="indexterm" name="id374420"></a><pre class="programlisting">char*               poppler_page_get_text               (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         <a href="poppler-poppler.html#PopplerSelectionStyle">PopplerSelectionStyle</a> style,
+                                                         <a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a> *rect);</pre>
+<p>
+Retrieves the contents of the specified <em class="parameter"><code>selection</code></em> as text.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> a <a href="poppler-poppler.html#PopplerPage"><span class="type">PopplerPage</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>style</code></em>&#160;:</span></td>
+<td> a <a href="poppler-poppler.html#PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>rect</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> a pointer to the contents of the <em class="parameter"><code>selection</code></em>
+              as a string
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id374532"></a><h3>
+<a name="poppler-page-get-duration"></a>poppler_page_get_duration ()</h3>
+<a class="indexterm" name="id374543"></a><pre class="programlisting">double              poppler_page_get_duration           (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page);</pre>
+<p>
+Returns the duration of <em class="parameter"><code>page</code></em></p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> a <a href="poppler-poppler.html#PopplerPage"><span class="type">PopplerPage</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> duration in seconds of <em class="parameter"><code>page</code></em> or -1.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id374611"></a><h3>
+<a name="poppler-page-get-transition"></a>poppler_page_get_transition ()</h3>
+<a class="indexterm" name="id374621"></a><pre class="programlisting"><a href="poppler-poppler-page.html#PopplerPageTransition">PopplerPageTransition</a>* poppler_page_get_transition      (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page);</pre>
+<p>
+Returns the transition effect of <em class="parameter"><code>page</code></em></p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> a <a href="poppler-poppler.html#PopplerPage"><span class="type">PopplerPage</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> a <a href="poppler-poppler-page.html#PopplerPageTransition"><span class="type">PopplerPageTransition</span></a> or NULL.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id374691"></a><h3>
+<a name="poppler-page-get-link-mapping"></a>poppler_page_get_link_mapping ()</h3>
+<a class="indexterm" name="id374701"></a><pre class="programlisting">GList*              poppler_page_get_link_mapping       (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page);</pre>
+<p>
+Returns a list of <a href="poppler-poppler.html#PopplerLinkMapping"><span class="type">PopplerLinkMapping</span></a> items that map from a
+location on <em class="parameter"><code>page</code></em> to a <a href="poppler-poppler-action.html#PopplerAction"><span class="type">PopplerAction</span></a>.  This list must be freed
+with <a href="poppler-poppler-page.html#poppler-page-free-link-mapping"><code class="function">poppler_page_free_link_mapping()</code></a> when done.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> A <a href="poppler-poppler.html#PopplerPage"><span class="type">PopplerPage</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> A <span class="type">GList</span> of <a href="poppler-poppler.html#PopplerLinkMapping"><span class="type">PopplerLinkMapping</span></a>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id374798"></a><h3>
+<a name="poppler-page-free-link-mapping"></a>poppler_page_free_link_mapping ()</h3>
+<a class="indexterm" name="id374809"></a><pre class="programlisting">void                poppler_page_free_link_mapping      (GList *list);</pre>
+<p>
+Frees a list of <a href="poppler-poppler.html#PopplerLinkMapping"><span class="type">PopplerLinkMapping</span></a>s allocated by
+<a href="poppler-poppler-page.html#poppler-page-get-link-mapping"><code class="function">poppler_page_get_link_mapping()</code></a>.  It also frees the <a href="poppler-poppler-action.html#PopplerAction"><span class="type">PopplerAction</span></a>s
+that each mapping contains, so if you want to keep them around, you need to
+copy them with <a href="poppler-poppler-action.html#poppler-action-copy"><code class="function">poppler_action_copy()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>list</code></em>&#160;:</span></td>
+<td> A list of <a href="poppler-poppler.html#PopplerLinkMapping"><span class="type">PopplerLinkMapping</span></a>s
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id374891"></a><h3>
+<a name="poppler-page-get-image-mapping"></a>poppler_page_get_image_mapping ()</h3>
+<a class="indexterm" name="id374902"></a><pre class="programlisting">GList*              poppler_page_get_image_mapping      (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page);</pre>
+<p>
+Returns a list of <a href="poppler-poppler-page.html#PopplerImageMapping"><span class="type">PopplerImageMapping</span></a> items that map from a
+location on <em class="parameter"><code>page</code></em> to a <span class="type">GdkPixbuf</span>.  This list must be freed
+with <a href="poppler-poppler-page.html#poppler-page-free-image-mapping"><code class="function">poppler_page_free_image_mapping()</code></a> when done.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> A <a href="poppler-poppler.html#PopplerPage"><span class="type">PopplerPage</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> A <span class="type">GList</span> of <a href="poppler-poppler-page.html#PopplerImageMapping"><span class="type">PopplerImageMapping</span></a>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id374999"></a><h3>
+<a name="poppler-page-free-image-mapping"></a>poppler_page_free_image_mapping ()</h3>
+<a class="indexterm" name="id375009"></a><pre class="programlisting">void                poppler_page_free_image_mapping     (GList *list);</pre>
+<p>
+Frees a list of <a href="poppler-poppler-page.html#PopplerImageMapping"><span class="type">PopplerImageMapping</span></a>s allocated by
+<a href="poppler-poppler-page.html#poppler-page-get-image-mapping"><code class="function">poppler_page_get_image_mapping()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>list</code></em>&#160;:</span></td>
+<td> A list of <a href="poppler-poppler-page.html#PopplerImageMapping"><span class="type">PopplerImageMapping</span></a>s
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id375075"></a><h3>
+<a name="poppler-page-get-form-field-mapping"></a>poppler_page_get_form_field_mapping ()</h3>
+<a class="indexterm" name="id375086"></a><pre class="programlisting">GList*              poppler_page_get_form_field_mapping (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page);</pre>
+<p>
+Returns a list of <a href="poppler-poppler-page.html#PopplerFormFieldMapping"><span class="type">PopplerFormFieldMapping</span></a> items that map from a
+location on <em class="parameter"><code>page</code></em> to a form field.  This list must be freed
+with <a href="poppler-poppler-page.html#poppler-page-free-form-field-mapping"><code class="function">poppler_page_free_form_field_mapping()</code></a> when done.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> A <a href="poppler-poppler.html#PopplerPage"><span class="type">PopplerPage</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> A <span class="type">GList</span> of <a href="poppler-poppler-page.html#PopplerFormFieldMapping"><span class="type">PopplerFormFieldMapping</span></a>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id375177"></a><h3>
+<a name="poppler-page-free-form-field-mapping"></a>poppler_page_free_form_field_mapping ()</h3>
+<a class="indexterm" name="id375187"></a><pre class="programlisting">void                poppler_page_free_form_field_mapping
+                                                        (GList *list);</pre>
+<p>
+Frees a list of <a href="poppler-poppler-page.html#PopplerFormFieldMapping"><span class="type">PopplerFormFieldMapping</span></a>s allocated by
+<a href="poppler-poppler-page.html#poppler-page-get-form-field-mapping"><code class="function">poppler_page_get_form_field_mapping()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>list</code></em>&#160;:</span></td>
+<td> A list of <a href="poppler-poppler-page.html#PopplerFormFieldMapping"><span class="type">PopplerFormFieldMapping</span></a>s
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id375254"></a><h3>
+<a name="poppler-page-get-selection-region"></a>poppler_page_get_selection_region ()</h3>
+<a class="indexterm" name="id375264"></a><pre class="programlisting">GdkRegion*          poppler_page_get_selection_region   (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         gdouble scale,
+                                                         <a href="poppler-poppler.html#PopplerSelectionStyle">PopplerSelectionStyle</a> style,
+                                                         <a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a> *selection);</pre>
+<p>
+Returns a region containing the area that would be rendered by
+<a href="poppler-poppler-page.html#poppler-page-render-selection"><code class="function">poppler_page_render_selection()</code></a> or
+<a href="poppler-poppler-page.html#poppler-page-render-selection-to-pixbuf"><code class="function">poppler_page_render_selection_to_pixbuf()</code></a>. The returned
+region must be freed with <code class="function">gdk_region_destroy()</code>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> a <a href="poppler-poppler.html#PopplerPage"><span class="type">PopplerPage</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>scale</code></em>&#160;:</span></td>
+<td> scale specified as pixels per point
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>style</code></em>&#160;:</span></td>
+<td> a <a href="poppler-poppler.html#PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>selection</code></em>&#160;:</span></td>
+<td> start and end point of selection as a rectangle
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> a newly allocated <span class="type">GdkRegion</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id375417"></a><h3>
+<a name="poppler-page-render-selection"></a>poppler_page_render_selection ()</h3>
+<a class="indexterm" name="id375427"></a><pre class="programlisting">void                poppler_page_render_selection       (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         cairo_t *cairo,
+                                                         <a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a> *selection,
+                                                         <a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a> *old_selection,
+                                                         <a href="poppler-poppler.html#PopplerSelectionStyle">PopplerSelectionStyle</a> style,
+                                                         GdkColor *glyph_color,
+                                                         GdkColor *background_color);</pre>
+<p>
+Render the selection specified by <em class="parameter"><code>selection</code></em> for <em class="parameter"><code>page</code></em> to
+the given cairo context.  The selection will be rendered, using
+<em class="parameter"><code>glyph_color</code></em> for the glyphs and <em class="parameter"><code>background_color</code></em> for the selection
+background.
+</p>
+<p>
+If non-NULL, <em class="parameter"><code>old_selection</code></em> specifies the selection that is already
+rendered to <em class="parameter"><code>cairo</code></em>, in which case this function will (some day)
+only render the changed part of the selection.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> the <a href="poppler-poppler.html#PopplerPage"><span class="type">PopplerPage</span></a> for which to render selection
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>cairo</code></em>&#160;:</span></td>
+<td> cairo context to render to
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>selection</code></em>&#160;:</span></td>
+<td> start and end point of selection as a rectangle
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>old_selection</code></em>&#160;:</span></td>
+<td> previous selection
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>style</code></em>&#160;:</span></td>
+<td> a <a href="poppler-poppler.html#PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>glyph_color</code></em>&#160;:</span></td>
+<td> color to use for drawing glyphs
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>background_color</code></em>&#160;:</span></td>
+<td> color to use for the selection background
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id375630"></a><h3>
+<a name="poppler-page-render-selection-to-pixbuf"></a>poppler_page_render_selection_to_pixbuf ()</h3>
+<a class="indexterm" name="id375640"></a><pre class="programlisting">void                poppler_page_render_selection_to_pixbuf
+                                                        (<a href="poppler-poppler.html#PopplerPage">PopplerPage</a> *page,
+                                                         gdouble scale,
+                                                         int rotation,
+                                                         GdkPixbuf *pixbuf,
+                                                         <a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a> *selection,
+                                                         <a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a> *old_selection,
+                                                         <a href="poppler-poppler.html#PopplerSelectionStyle">PopplerSelectionStyle</a> style,
+                                                         GdkColor *glyph_color,
+                                                         GdkColor *background_color);</pre>
+<p>
+Render the selection specified by <em class="parameter"><code>selection</code></em> for <em class="parameter"><code>page</code></em> into
+<em class="parameter"><code>pixbuf</code></em>.  The selection will be rendered at <em class="parameter"><code>scale</code></em>, using
+<em class="parameter"><code>glyph_color</code></em> for the glyphs and <em class="parameter"><code>background_color</code></em> for the selection
+background.
+</p>
+<p>
+If non-NULL, <em class="parameter"><code>old_selection</code></em> specifies the selection that is already
+rendered in <em class="parameter"><code>pixbuf</code></em>, in which case this function will (some day)
+only render the changed part of the selection.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>page</code></em>&#160;:</span></td>
+<td> the <a href="poppler-poppler.html#PopplerPage"><span class="type">PopplerPage</span></a> for which to render selection
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>scale</code></em>&#160;:</span></td>
+<td> scale specified as pixels per point
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>rotation</code></em>&#160;:</span></td>
+<td> rotate the document by the specified degree
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>pixbuf</code></em>&#160;:</span></td>
+<td> pixbuf to render to
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>selection</code></em>&#160;:</span></td>
+<td> start and end point of selection as a rectangle
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>old_selection</code></em>&#160;:</span></td>
+<td> previous selection
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>style</code></em>&#160;:</span></td>
+<td> a <a href="poppler-poppler.html#PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>glyph_color</code></em>&#160;:</span></td>
+<td> color to use for drawing glyphs
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>background_color</code></em>&#160;:</span></td>
+<td> color to use for the selection background
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id375891"></a><h3>
+<a name="POPPLER-TYPE-RECTANGLE:CAPS"></a>POPPLER_TYPE_RECTANGLE</h3>
+<a class="indexterm" name="id375902"></a><pre class="programlisting">#define POPPLER_TYPE_RECTANGLE             (poppler_rectangle_get_type ())
+</pre>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id375916"></a><h3>
+<a name="PopplerRectangle"></a>PopplerRectangle</h3>
+<a class="indexterm" name="id375926"></a><pre class="programlisting">typedef struct {
+  gdouble x1;
+  gdouble y1;
+  gdouble x2;
+  gdouble y2;
+} PopplerRectangle;
+</pre>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id375941"></a><h3>
+<a name="poppler-rectangle-get-type"></a>poppler_rectangle_get_type ()</h3>
+<a class="indexterm" name="id375951"></a><pre class="programlisting">GType               poppler_rectangle_get_type          (void);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id375984"></a><h3>
+<a name="poppler-rectangle-new"></a>poppler_rectangle_new ()</h3>
+<a class="indexterm" name="id375994"></a><pre class="programlisting"><a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a>*   poppler_rectangle_new               (void);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376025"></a><h3>
+<a name="poppler-rectangle-copy"></a>poppler_rectangle_copy ()</h3>
+<a class="indexterm" name="id376036"></a><pre class="programlisting"><a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a>*   poppler_rectangle_copy              (<a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a> *rectangle);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>rectangle</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376085"></a><h3>
+<a name="poppler-rectangle-free"></a>poppler_rectangle_free ()</h3>
+<a class="indexterm" name="id376096"></a><pre class="programlisting">void                poppler_rectangle_free              (<a href="poppler-poppler.html#PopplerRectangle">PopplerRectangle</a> *rectangle);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>rectangle</code></em>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376135"></a><h3>
+<a name="POPPLER-TYPE-PAGE-TRANSITION:CAPS"></a>POPPLER_TYPE_PAGE_TRANSITION</h3>
+<a class="indexterm" name="id376146"></a><pre class="programlisting">#define POPPLER_TYPE_PAGE_TRANSITION                (poppler_page_transition_get_type ())
+</pre>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376160"></a><h3>
+<a name="PopplerPageTransition"></a>PopplerPageTransition</h3>
+<a class="indexterm" name="id376171"></a><pre class="programlisting">typedef struct {
+  PopplerPageTransitionType type;
+  PopplerPageTransitionAlignment alignment;
+  PopplerPageTransitionDirection direction;
+  gint duration;
+  gint angle;
+  gdouble scale;
+  gboolean rectangular;
+} PopplerPageTransition;
+</pre>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376186"></a><h3>
+<a name="poppler-page-transition-get-type"></a>poppler_page_transition_get_type ()</h3>
+<a class="indexterm" name="id376197"></a><pre class="programlisting">GType               poppler_page_transition_get_type    (void);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376229"></a><h3>
+<a name="poppler-page-transition-new"></a>poppler_page_transition_new ()</h3>
+<a class="indexterm" name="id376239"></a><pre class="programlisting"><a href="poppler-poppler-page.html#PopplerPageTransition">PopplerPageTransition</a>* poppler_page_transition_new      (void);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376271"></a><h3>
+<a name="poppler-page-transition-copy"></a>poppler_page_transition_copy ()</h3>
+<a class="indexterm" name="id376281"></a><pre class="programlisting"><a href="poppler-poppler-page.html#PopplerPageTransition">PopplerPageTransition</a>* poppler_page_transition_copy     (<a href="poppler-poppler-page.html#PopplerPageTransition">PopplerPageTransition</a> *transition);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>transition</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376330"></a><h3>
+<a name="poppler-page-transition-free"></a>poppler_page_transition_free ()</h3>
+<a class="indexterm" name="id376341"></a><pre class="programlisting">void                poppler_page_transition_free        (<a href="poppler-poppler-page.html#PopplerPageTransition">PopplerPageTransition</a> *transition);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>transition</code></em>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376381"></a><h3>
+<a name="POPPLER-TYPE-LINK-MAPPING:CAPS"></a>POPPLER_TYPE_LINK_MAPPING</h3>
+<a class="indexterm" name="id376391"></a><pre class="programlisting">#define POPPLER_TYPE_LINK_MAPPING             (poppler_link_mapping_get_type ())
+</pre>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376407"></a><h3>
+<a name="PopplerLinkMapping"></a>PopplerLinkMapping</h3>
+<a class="indexterm" name="id376419"></a><pre class="programlisting">typedef struct {
+  PopplerRectangle area;
+  PopplerAction *action;
+} PopplerLinkMapping;
+</pre>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376435"></a><h3>
+<a name="poppler-link-mapping-get-type"></a>poppler_link_mapping_get_type ()</h3>
+<a class="indexterm" name="id376448"></a><pre class="programlisting">GType               poppler_link_mapping_get_type       (void);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376484"></a><h3>
+<a name="poppler-link-mapping-new"></a>poppler_link_mapping_new ()</h3>
+<a class="indexterm" name="id376497"></a><pre class="programlisting"><a href="poppler-poppler.html#PopplerLinkMapping">PopplerLinkMapping</a>* poppler_link_mapping_new            (void);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376532"></a><h3>
+<a name="poppler-link-mapping-copy"></a>poppler_link_mapping_copy ()</h3>
+<a class="indexterm" name="id376546"></a><pre class="programlisting"><a href="poppler-poppler.html#PopplerLinkMapping">PopplerLinkMapping</a>* poppler_link_mapping_copy           (<a href="poppler-poppler.html#PopplerLinkMapping">PopplerLinkMapping</a> *mapping);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>mapping</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376602"></a><h3>
+<a name="poppler-link-mapping-free"></a>poppler_link_mapping_free ()</h3>
+<a class="indexterm" name="id376615"></a><pre class="programlisting">void                poppler_link_mapping_free           (<a href="poppler-poppler.html#PopplerLinkMapping">PopplerLinkMapping</a> *mapping);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>mapping</code></em>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376661"></a><h3>
+<a name="POPPLER-TYPE-IMAGE-MAPPING:CAPS"></a>POPPLER_TYPE_IMAGE_MAPPING</h3>
+<a class="indexterm" name="id376674"></a><pre class="programlisting">#define POPPLER_TYPE_IMAGE_MAPPING             (poppler_image_mapping_get_type ())
+</pre>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376690"></a><h3>
+<a name="PopplerImageMapping"></a>PopplerImageMapping</h3>
+<a class="indexterm" name="id376702"></a><pre class="programlisting">typedef struct {
+  PopplerRectangle area;
+  GdkPixbuf *image;	
+} PopplerImageMapping;
+</pre>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376718"></a><h3>
+<a name="poppler-image-mapping-get-type"></a>poppler_image_mapping_get_type ()</h3>
+<a class="indexterm" name="id376731"></a><pre class="programlisting">GType               poppler_image_mapping_get_type      (void);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376767"></a><h3>
+<a name="poppler-image-mapping-new"></a>poppler_image_mapping_new ()</h3>
+<a class="indexterm" name="id376780"></a><pre class="programlisting"><a href="poppler-poppler-page.html#PopplerImageMapping">PopplerImageMapping</a>* poppler_image_mapping_new          (void);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376816"></a><h3>
+<a name="poppler-image-mapping-copy"></a>poppler_image_mapping_copy ()</h3>
+<a class="indexterm" name="id376829"></a><pre class="programlisting"><a href="poppler-poppler-page.html#PopplerImageMapping">PopplerImageMapping</a>* poppler_image_mapping_copy         (<a href="poppler-poppler-page.html#PopplerImageMapping">PopplerImageMapping</a> *mapping);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>mapping</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376885"></a><h3>
+<a name="poppler-image-mapping-free"></a>poppler_image_mapping_free ()</h3>
+<a class="indexterm" name="id376898"></a><pre class="programlisting">void                poppler_image_mapping_free          (<a href="poppler-poppler-page.html#PopplerImageMapping">PopplerImageMapping</a> *mapping);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>mapping</code></em>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376944"></a><h3>
+<a name="POPPLER-TYPE-FORM-FIELD-MAPPING:CAPS"></a>POPPLER_TYPE_FORM_FIELD_MAPPING</h3>
+<a class="indexterm" name="id376956"></a><pre class="programlisting">#define POPPLER_TYPE_FORM_FIELD_MAPPING               (poppler_form_field_mapping_get_type ())
+</pre>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id376973"></a><h3>
+<a name="PopplerFormFieldMapping"></a>PopplerFormFieldMapping</h3>
+<a class="indexterm" name="id376985"></a><pre class="programlisting">typedef struct {
+  PopplerRectangle area;
+  PopplerFormField *field;
+} PopplerFormFieldMapping;
+</pre>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id377001"></a><h3>
+<a name="poppler-form-field-mapping-get-type"></a>poppler_form_field_mapping_get_type ()</h3>
+<a class="indexterm" name="id377015"></a><pre class="programlisting">GType               poppler_form_field_mapping_get_type (void);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id377051"></a><h3>
+<a name="poppler-form-field-mapping-new"></a>poppler_form_field_mapping_new ()</h3>
+<a class="indexterm" name="id377064"></a><pre class="programlisting"><a href="poppler-poppler-page.html#PopplerFormFieldMapping">PopplerFormFieldMapping</a>* poppler_form_field_mapping_new (void);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id377100"></a><h3>
+<a name="poppler-form-field-mapping-copy"></a>poppler_form_field_mapping_copy ()</h3>
+<a class="indexterm" name="id377113"></a><pre class="programlisting"><a href="poppler-poppler-page.html#PopplerFormFieldMapping">PopplerFormFieldMapping</a>* poppler_form_field_mapping_copy
+                                                        (<a href="poppler-poppler-page.html#PopplerFormFieldMapping">PopplerFormFieldMapping</a> *mapping);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>mapping</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id377169"></a><h3>
+<a name="poppler-form-field-mapping-free"></a>poppler_form_field_mapping_free ()</h3>
+<a class="indexterm" name="id377182"></a><pre class="programlisting">void                poppler_form_field_mapping_free     (<a href="poppler-poppler-page.html#PopplerFormFieldMapping">PopplerFormFieldMapping</a> *mapping);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>mapping</code></em>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+</div>
+</body>
+</html>
