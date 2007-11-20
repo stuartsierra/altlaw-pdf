@@ -47,7 +47,7 @@ GBool ignore=gFalse;
 double scale=1.5;
 GBool noframes=gFalse;
 GBool stout=gFalse;
-GBool xml=gFalse;
+GBool xml=gTrue;
 GBool errQuiet=gFalse;
 GBool noDrm=gFalse;
 

@@ -619,33 +619,32 @@ void HtmlPage::coalesce() {
 
 }
 
-void HtmlPage::dumpAsXML(FILE* f,int page){  
-  fprintf(f, "<page number=\"%d\" position=\"absolute\"", page);
-  fprintf(f," top=\"0\" left=\"0\" height=\"%d\" width=\"%d\">\n", pageHeight,pageWidth);
+void HtmlPage::dumpAsXML(FILE* f,int page){
+  double emSize = 10.0;  // an EM is approximately 10 points
+  double emHeight = pageHeight / emSize;
+  double emWidth = pageWidth / emSize;
+  fprintf(f, "<div class=\"pdftohtml-page\"" );
+  fprintf(f," style=\"position:relative;height:%.2fem;width:%.2fem;\">\n",
+	  emHeight,emWidth);
     
-  for(int i=fontsPageMarker;i < fonts->size();i++) {
-    GooString *fontCSStyle = fonts->CSStyle(i);
-    fprintf(f,"\t%s\n",fontCSStyle->getCString());
-    delete fontCSStyle;
-  }
-  
   GooString *str, *str1 = NULL;
   for(HtmlString *tmp=yxStrings;tmp;tmp=tmp->yxNext){
     if (tmp->htext){
       str=new GooString(tmp->htext);
-      fprintf(f,"<text top=\"%d\" left=\"%d\" ",xoutRound(tmp->yMin),xoutRound(tmp->xMin));
-      fprintf(f,"width=\"%d\" height=\"%d\" ",xoutRound(tmp->xMax-tmp->xMin),xoutRound(tmp->yMax-tmp->yMin));
-      fprintf(f,"font=\"%d\">", tmp->fontpos);
+      double emTop = tmp->yMin / emSize;
+      double emLeft = tmp->xMin / emSize;
+      fprintf(f,"<div class=\"pdftohtml-text\" style=\"position:absolute;"
+	      "top:%.2fem;left:%.2fem\">", emTop, emLeft);
       if (tmp->fontpos!=-1){
 	str1=fonts->getCSStyle(tmp->fontpos, str);
       }
       fputs(str1->getCString(),f);
       delete str;
       delete str1;
-      fputs("</text>\n",f);
+      fputs("</div>\n",f);
     }
   }
-  fputs("</page>\n",f);
+  fputs("</div>\n",f);
 }
 
 
@@ -978,7 +977,7 @@ HtmlOutputDev::HtmlOutputDev(char *fileName, char *title,
     else {
       GooString* right=new GooString(fileName);
       if (!xml) right->append(".html");
-      if (xml) right->append(".xml");
+      if (xml) right->append(".html");
       if (!(page=fopen(right->getCString(),"w"))){
 	delete right;
 	error(-1, "Couldn't open html file '%s'", right->getCString());
@@ -990,9 +989,10 @@ HtmlOutputDev::HtmlOutputDev(char *fileName, char *title,
     htmlEncoding = mapEncodingToHtml(globalParams->getTextEncodingName()); 
     if (xml) 
     {
-      fprintf(page, "<?xml version=\"1.0\" encoding=\"%s\"?>\n", htmlEncoding);
-      fputs("<!DOCTYPE pdf2xml SYSTEM \"pdf2xml.dtd\">\n\n", page);
-      fputs("<pdf2xml>\n",page);
+      // fprintf(page, "<?xml version=\"1.0\" encoding=\"%s\"?>\n", htmlEncoding);
+      // fputs("<!DOCTYPE pdf2xml SYSTEM \"pdf2xml.dtd\">\n\n", page);
+      fputs("<div class=\"pdftohtml\" "
+	    "style=\"white-space:nowrap;\">\n",page);
     } 
     else 
     {
@@ -1030,7 +1030,7 @@ HtmlOutputDev::~HtmlOutputDev() {
       fclose(fContentsFrame);
     }
     if (xml) {
-      fputs("</pdf2xml>\n",page);  
+      fputs("</div>\n",page);  
       fclose(page);
     } else
     if ( !complexMode || xml || noframes )
