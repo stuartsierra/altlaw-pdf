@@ -37,7 +37,7 @@
 
 static int firstPage = 1;
 static int lastPage = 0;
-static GBool rawOrder = gFalse;
+static GBool rawOrder = gTrue;
 GBool printCommands = gTrue;
 static GBool printHelp = gFalse;
 GBool printHtml = gFalse;
@@ -68,8 +68,8 @@ static ArgDesc argDesc[] = {
    "first page to convert"},
   {"-l",      argInt,      &lastPage,      0,
    "last page to convert"},
-  {"-raw",    argFlag,     &rawOrder,      0,
-    "keep strings in content stream order"},
+  /*{"-raw",    argFlag,     &rawOrder,      0,
+    "keep strings in content stream order"},*/
   {"-q",      argFlag,     &errQuiet,      0,
    "don't print any messages or errors"},
   {"-h",      argFlag,     &printHelp,     0,
@@ -265,7 +265,7 @@ int main(int argc, char *argv[]) {
 	  }
   }}
 
-  // rawOrder = complexMode; // todo: figure out what exactly rawOrder do :)
+  rawOrder = complexMode; // todo: figure out what exactly rawOrder do :)
 
   // write text file
   htmlOut = new HtmlOutputDev(htmlFileName->getCString(), 

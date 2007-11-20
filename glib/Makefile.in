@@ -332,7 +332,7 @@ libpoppler_glib_la_LIBADD = \
 
 libpoppler_glib_la_LDFLAGS = -version-info 2:0:0
 test_poppler_glib_SOURCES = \
-       test-poppler-glib.c
+       test-poppler-glib.cc
 
 test_poppler_glib_LDADD = \
 	$(top_builddir)/poppler/libpoppler.la	\
@@ -423,7 +423,7 @@ clean-noinstPROGRAMS:
 	done
 test-poppler-glib$(EXEEXT): $(test_poppler_glib_OBJECTS) $(test_poppler_glib_DEPENDENCIES) 
 	@rm -f test-poppler-glib$(EXEEXT)
-	$(LINK) $(test_poppler_glib_LDFLAGS) $(test_poppler_glib_OBJECTS) $(test_poppler_glib_LDADD) $(LIBS)
+	$(CXXLINK) $(test_poppler_glib_LDFLAGS) $(test_poppler_glib_OBJECTS) $(test_poppler_glib_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

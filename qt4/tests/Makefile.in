@@ -38,7 +38,8 @@ build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = test-poppler-qt4$(EXEEXT) \
 	stress-poppler-qt4$(EXEEXT) poppler-fonts$(EXEEXT) \
-	test-password-qt4$(EXEEXT) poppler-attachments$(EXEEXT)
+	test-password-qt4$(EXEEXT) stress-poppler-dir$(EXEEXT) \
+	poppler-attachments$(EXEEXT)
 @BUILD_POPPLER_QT4_TRUE@check_PROGRAMS = $(am__EXEEXT_1)
 subdir = qt4/tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -58,6 +59,7 @@ CONFIG_CLEAN_FILES =
 @BUILD_POPPLER_QT4_TRUE@	check_metadata$(EXEEXT) \
 @BUILD_POPPLER_QT4_TRUE@	check_permissions$(EXEEXT) \
 @BUILD_POPPLER_QT4_TRUE@	check_pagemode$(EXEEXT) \
+@BUILD_POPPLER_QT4_TRUE@	check_password$(EXEEXT) \
 @BUILD_POPPLER_QT4_TRUE@	check_pagelayout$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am__check_attachments_SOURCES_DIST = check_attachments.cpp
@@ -100,6 +102,12 @@ am__check_pagemode_SOURCES_DIST = check_pagemode.cpp
 check_pagemode_OBJECTS = $(am_check_pagemode_OBJECTS)
 @BUILD_POPPLER_QT4_TRUE@check_pagemode_DEPENDENCIES =  \
 @BUILD_POPPLER_QT4_TRUE@	$(am__DEPENDENCIES_2)
+am__check_password_SOURCES_DIST = check_password.cpp
+@BUILD_POPPLER_QT4_TRUE@am_check_password_OBJECTS =  \
+@BUILD_POPPLER_QT4_TRUE@	check_password.$(OBJEXT)
+check_password_OBJECTS = $(am_check_password_OBJECTS)
+@BUILD_POPPLER_QT4_TRUE@check_password_DEPENDENCIES =  \
+@BUILD_POPPLER_QT4_TRUE@	$(am__DEPENDENCIES_2)
 am__check_permissions_SOURCES_DIST = check_permissions.cpp
 @BUILD_POPPLER_QT4_TRUE@am_check_permissions_OBJECTS =  \
 @BUILD_POPPLER_QT4_TRUE@	check_permissions.$(OBJEXT)
@@ -112,6 +120,9 @@ poppler_attachments_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_poppler_fonts_OBJECTS = poppler-fonts.$(OBJEXT)
 poppler_fonts_OBJECTS = $(am_poppler_fonts_OBJECTS)
 poppler_fonts_DEPENDENCIES = $(am__DEPENDENCIES_2)
+am_stress_poppler_dir_OBJECTS = stress-poppler-dir.$(OBJEXT)
+stress_poppler_dir_OBJECTS = $(am_stress_poppler_dir_OBJECTS)
+stress_poppler_dir_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_stress_poppler_qt4_OBJECTS = stress-poppler-qt4.$(OBJEXT)
 stress_poppler_qt4_OBJECTS = $(am_stress_poppler_qt4_OBJECTS)
 stress_poppler_qt4_DEPENDENCIES = $(am__DEPENDENCIES_2)
@@ -135,8 +146,9 @@ CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 SOURCES = $(check_attachments_SOURCES) $(check_dateConversion_SOURCES) \
 	$(check_fonts_SOURCES) $(check_metadata_SOURCES) \
 	$(check_pagelayout_SOURCES) $(check_pagemode_SOURCES) \
-	$(check_permissions_SOURCES) $(poppler_attachments_SOURCES) \
-	$(poppler_fonts_SOURCES) $(stress_poppler_qt4_SOURCES) \
+	$(check_password_SOURCES) $(check_permissions_SOURCES) \
+	$(poppler_attachments_SOURCES) $(poppler_fonts_SOURCES) \
+	$(stress_poppler_dir_SOURCES) $(stress_poppler_qt4_SOURCES) \
 	$(test_password_qt4_SOURCES) $(test_poppler_qt4_SOURCES)
 DIST_SOURCES = $(am__check_attachments_SOURCES_DIST) \
 	$(am__check_dateConversion_SOURCES_DIST) \
@@ -144,10 +156,11 @@ DIST_SOURCES = $(am__check_attachments_SOURCES_DIST) \
 	$(am__check_metadata_SOURCES_DIST) \
 	$(am__check_pagelayout_SOURCES_DIST) \
 	$(am__check_pagemode_SOURCES_DIST) \
+	$(am__check_password_SOURCES_DIST) \
 	$(am__check_permissions_SOURCES_DIST) \
 	$(poppler_attachments_SOURCES) $(poppler_fonts_SOURCES) \
-	$(stress_poppler_qt4_SOURCES) $(test_password_qt4_SOURCES) \
-	$(test_poppler_qt4_SOURCES)
+	$(stress_poppler_dir_SOURCES) $(stress_poppler_qt4_SOURCES) \
+	$(test_password_qt4_SOURCES) $(test_poppler_qt4_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -349,6 +362,10 @@ stress_poppler_qt4_SOURCES = \
        stress-poppler-qt4.cpp
 
 stress_poppler_qt4_LDADD = $(LDADDS)
+stress_poppler_dir_SOURCES = \
+       stress-poppler-dir.cpp
+
+stress_poppler_dir_LDADD = $(LDADDS)
 @BUILD_POPPLER_QT4_TRUE@TESTS = \
 @BUILD_POPPLER_QT4_TRUE@	check_attachments	\
 @BUILD_POPPLER_QT4_TRUE@	check_dateConversion 	\
@@ -356,6 +373,7 @@ stress_poppler_qt4_LDADD = $(LDADDS)
 @BUILD_POPPLER_QT4_TRUE@	check_metadata         	\
 @BUILD_POPPLER_QT4_TRUE@	check_permissions      	\
 @BUILD_POPPLER_QT4_TRUE@	check_pagemode    	\
+@BUILD_POPPLER_QT4_TRUE@	check_password    	\
 @BUILD_POPPLER_QT4_TRUE@	check_pagelayout
 
 @BUILD_POPPLER_QT4_TRUE@check_attachments_SOURCES = check_attachments.cpp
@@ -372,6 +390,8 @@ stress_poppler_qt4_LDADD = $(LDADDS)
 @BUILD_POPPLER_QT4_TRUE@check_permissions_LDADD = $(LDADDS)
 @BUILD_POPPLER_QT4_TRUE@check_pagelayout_SOURCES = check_pagelayout.cpp
 @BUILD_POPPLER_QT4_TRUE@check_pagelayout_LDADD = $(LDADDS)
+@BUILD_POPPLER_QT4_TRUE@check_password_SOURCES = check_password.cpp
+@BUILD_POPPLER_QT4_TRUE@check_password_LDADD = $(LDADDS)
 all: all-am
 
 .SUFFIXES:
@@ -437,6 +457,9 @@ check_pagelayout$(EXEEXT): $(check_pagelayout_OBJECTS) $(check_pagelayout_DEPEND
 check_pagemode$(EXEEXT): $(check_pagemode_OBJECTS) $(check_pagemode_DEPENDENCIES) 
 	@rm -f check_pagemode$(EXEEXT)
 	$(CXXLINK) $(check_pagemode_LDFLAGS) $(check_pagemode_OBJECTS) $(check_pagemode_LDADD) $(LIBS)
+check_password$(EXEEXT): $(check_password_OBJECTS) $(check_password_DEPENDENCIES) 
+	@rm -f check_password$(EXEEXT)
+	$(CXXLINK) $(check_password_LDFLAGS) $(check_password_OBJECTS) $(check_password_LDADD) $(LIBS)
 check_permissions$(EXEEXT): $(check_permissions_OBJECTS) $(check_permissions_DEPENDENCIES) 
 	@rm -f check_permissions$(EXEEXT)
 	$(CXXLINK) $(check_permissions_LDFLAGS) $(check_permissions_OBJECTS) $(check_permissions_LDADD) $(LIBS)
@@ -446,6 +469,9 @@ poppler-attachments$(EXEEXT): $(poppler_attachments_OBJECTS) $(poppler_attachmen
 poppler-fonts$(EXEEXT): $(poppler_fonts_OBJECTS) $(poppler_fonts_DEPENDENCIES) 
 	@rm -f poppler-fonts$(EXEEXT)
 	$(CXXLINK) $(poppler_fonts_LDFLAGS) $(poppler_fonts_OBJECTS) $(poppler_fonts_LDADD) $(LIBS)
+stress-poppler-dir$(EXEEXT): $(stress_poppler_dir_OBJECTS) $(stress_poppler_dir_DEPENDENCIES) 
+	@rm -f stress-poppler-dir$(EXEEXT)
+	$(CXXLINK) $(stress_poppler_dir_LDFLAGS) $(stress_poppler_dir_OBJECTS) $(stress_poppler_dir_LDADD) $(LIBS)
 stress-poppler-qt4$(EXEEXT): $(stress_poppler_qt4_OBJECTS) $(stress_poppler_qt4_DEPENDENCIES) 
 	@rm -f stress-poppler-qt4$(EXEEXT)
 	$(CXXLINK) $(stress_poppler_qt4_LDFLAGS) $(stress_poppler_qt4_OBJECTS) $(stress_poppler_qt4_LDADD) $(LIBS)
@@ -468,9 +494,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_metadata.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_pagelayout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_pagemode.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_password.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_permissions.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/poppler-attachments.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/poppler-fonts.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stress-poppler-dir.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stress-poppler-qt4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-password-qt4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-poppler-qt4.Po@am__quote@
@@ -759,6 +787,7 @@ SUFFIXES: .moc
 @BUILD_POPPLER_QT4_TRUE@check_pagemode.$(OBJEXT): check_pagemode.moc
 @BUILD_POPPLER_QT4_TRUE@check_permissions.$(OBJEXT): check_permissions.moc
 @BUILD_POPPLER_QT4_TRUE@check_pagelayout.$(OBJEXT): check_pagelayout.moc
+@BUILD_POPPLER_QT4_TRUE@check_password.$(OBJEXT): check_password.moc
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

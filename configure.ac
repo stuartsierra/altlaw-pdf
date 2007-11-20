@@ -1,5 +1,5 @@
 AC_PREREQ(2.59)
-AC_INIT(poppler, 0.6.1)
+AC_INIT(poppler, 0.6.2)
 AM_INIT_AUTOMAKE([foreign])
 AM_CONFIG_HEADER(config.h)
 AM_CONFIG_HEADER(poppler/poppler-config.h)
@@ -16,6 +16,7 @@ AC_PROG_CC_STDC
 AC_PROG_CXX
 AC_PROG_INSTALL
 AC_CHECK_FUNC(gettimeofday, AC_DEFINE(HAVE_GETTIMEOFDAY, 1, [Defines if gettimeofday is available on your system]))
+AC_CHECK_FUNC(localtime_r, AC_DEFINE(HAVE_LOCALTIME_R, 1, [Defines if localtime_r is available on your system]))
 
 dnl Enable these unconditionally.
 AC_DEFINE([OPI_SUPPORT], [1], [Generate OPI comments in PS output.])
@@ -153,7 +154,7 @@ fi
 AC_SUBST(FREETYPE_CFLAGS)
 AC_SUBST(FREETYPE_LIBS)
 
-PKG_CHECK_MODULES(FONTCONFIG, fontconfig)
+PKG_CHECK_MODULES(FONTCONFIG, fontconfig >= 2.0.0)
 
 AC_ARG_ENABLE(splash-output,
               AC_HELP_STRING([--disable-splash-output],

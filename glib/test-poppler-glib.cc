@@ -3,6 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include "poppler.h"
+#include "config.h"
 
 #define FAIL(msg) \
 	do { fprintf (stderr, "FAIL: %s\n", msg); exit (-1); } while (0)
@@ -11,14 +12,19 @@ static gchar *
 poppler_format_date (GTime utime)
 {
 	time_t time = (time_t) utime;
-	struct tm t;
 	char s[256];
 	const char *fmt_hack = "%c";
 	size_t len;
-
+#ifdef HAVE_LOCALTIME_R
+	struct tm t;
 	if (time == 0 || !localtime_r (&time, &t)) return NULL;
-
 	len = strftime (s, sizeof (s), fmt_hack, &t);
+#else
+	struct tm *t;
+	if (time == 0 || !(t = localtime (&time)) ) return NULL;
+	len = strftime (s, sizeof (s), fmt_hack, t);
+#endif
+
 	if (len == 0 || s[0] == '\0') return NULL;
 
 	return g_locale_to_utf8 (s, -1, NULL, NULL, NULL);
@@ -407,7 +413,7 @@ int main (int argc, char *argv[])
   printf ("\tFound text \"Bitwise\" at positions:\n");
   for (l = list; l != NULL; l = l->next)
     {
-      PopplerRectangle *rect = l->data;
+      PopplerRectangle *rect = (PopplerRectangle *)l->data;
 
       printf ("  (%f,%f)-(%f,%f)\n", rect->x1, rect->y1, rect->x2, rect->y2);
     }
@@ -478,7 +484,7 @@ int main (int argc, char *argv[])
 	  char *filename, *strdate;
 
 	  filename = g_strdup_printf ("/tmp/attach%d", i);
-	  attachment = l->data;
+	  attachment = (PopplerAttachment *)l->data;
 	  g_print ("\tname: %s\n", attachment->name);
 	  g_print ("\tdescription: %s\n", attachment->description);
 	  g_print ("\tsize: %d\n", attachment->size);

@@ -241,6 +241,7 @@ target_alias = @target_alias@
 win32_libs = @win32_libs@
 INCLUDES = \
 	-I$(top_srcdir)/glib			\
+	-I$(top_builddir)/glib			\
 	$(GTK_TEST_CFLAGS)
 
 poppler_glib_demo_SOURCES = \

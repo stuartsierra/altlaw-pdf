@@ -149,8 +149,6 @@ private:
   HtmlString *yxStrings;	// strings in y-major order
   HtmlString *xyStrings;	// strings in x-major order
   HtmlString *yxCur1, *yxCur2;	// cursors for yxStrings list
-  GBool yOverlap(HtmlString* s1, HtmlString* s2);
-  GBool isSuperscript(HtmlString* s1, HtmlString* s2);
   
   void setDocName(char* fname);
   void dumpAsXML(FILE* f,int page);

@@ -654,9 +654,11 @@ void GlobalParams::scanEncodingDirs() {
   GDir *dir;
   GDirEntry *entry;
 
-  dir = new GDir(POPPLER_DATADIR "/nameToUnicode", gFalse);
+  dir = new GDir(POPPLER_DATADIR "/nameToUnicode", gTrue);
   while (entry = dir->getNextEntry(), entry != NULL) {
-    parseNameToUnicode(entry->getFullPath());
+    if (!entry->isDir()) {
+      parseNameToUnicode(entry->getFullPath());
+    }
     delete entry;
   }
   delete dir;
@@ -1659,6 +1661,55 @@ GBool GlobalParams::setVectorAntialias(char *s) {
   ok = parseYesNo2(s, &vectorAntialias);
   unlockGlobalParams;
   return ok;
+}
+
+void GlobalParams::setStrokeAdjust(GBool adjust)
+{
+  lockGlobalParams;
+  strokeAdjust = adjust;
+  unlockGlobalParams;
+}
+
+void GlobalParams::setScreenType(ScreenType st)
+{
+  lockGlobalParams;
+  screenType = st;
+  unlockGlobalParams;
+}
+
+void GlobalParams::setScreenSize(int size)
+{
+  lockGlobalParams;
+  screenSize = size;
+  unlockGlobalParams;
+}
+
+void GlobalParams::setScreenDotRadius(int radius)
+{
+  lockGlobalParams;
+  screenDotRadius = radius;
+  unlockGlobalParams;
+}
+
+void GlobalParams::setScreenGamma(double gamma)
+{
+  lockGlobalParams;
+  screenGamma = gamma;
+  unlockGlobalParams;
+}
+
+void GlobalParams::setScreenBlackThreshold(double blackThreshold)
+{
+  lockGlobalParams;
+  screenBlackThreshold = blackThreshold;
+  unlockGlobalParams;
+}
+
+void GlobalParams::setScreenWhiteThreshold(double whiteThreshold)
+{
+  lockGlobalParams;
+  screenWhiteThreshold = whiteThreshold;
+  unlockGlobalParams;
 }
 
 void GlobalParams::setMapNumericCharNames(GBool map) {
