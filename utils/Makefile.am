@@ -39,6 +39,7 @@ bin_PROGRAMS =					\
 	pdfinfo					\
 	pdftops					\
 	pdftotext				\
+	altlaw_parse_pdf			\
 	pdftohtml				\
 	$(pdftoppm_binary)			\
 	$(pdftoabw_binary)
@@ -74,6 +75,16 @@ pdftops_SOURCES =				\
 
 pdftotext_SOURCES =				\
 	pdftotext.cc				\
+	$(common)
+
+altlaw_parse_pdf_SOURCES =			\
+	altlaw_parse_pdf.cc			\
+	HtmlFonts.cc				\
+	HtmlFonts.h				\
+	HtmlLinks.cc				\
+	HtmlLinks.h				\
+	Altlaw.cc				\
+	Altlaw.h				\
 	$(common)
 
 pdftohtml_SOURCES =				\
