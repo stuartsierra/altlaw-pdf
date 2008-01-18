@@ -70,7 +70,8 @@ enum AltLineType {
   PStart,
   Paragraph,
   PEnd,
-  BlockQuote
+  BlockQuote,
+  SectionHeading
 };
 
 class AltLine {
@@ -81,6 +82,8 @@ class AltLine {
   GooList *strings() { return s; };
   void add(AltString *str);
   GBool looksLikeFootnote();
+  GBool looksLikeSectionHeading();
+  GBool isBold();
 
   // basic accessors
   AltLineType type() { return _type; };
@@ -163,10 +166,10 @@ public:
   virtual void updateFont(GfxState *state);
   virtual void updateTextMat(GfxState *state) { /* printf("updateTextMat\n"); */ }
   virtual void updateCharSpace(GfxState *state) { /* printf("updateCharSpace(%f)\n",state->getCharSpace()); */ }
-  virtual void updateRender(GfxState *state) { printf("updateRender\n"); }
-  virtual void updateRise(GfxState *state) { printf("updateRise\n"); }
+  virtual void updateRender(GfxState *state) { /* printf("updateRender\n"); */ } // found in some CA9 ops
+  virtual void updateRise(GfxState *state) { /* printf("updateRise\n"); */ } // found in some CA9 ops
   virtual void updateWordSpace(GfxState *state) { /* printf("updateWordSpace(%f)\n",state->getWordSpace()); */ }
-  virtual void updateHorizScaling(GfxState *state) { printf("updateHorizScaling\n"); }
+  virtual void updateHorizScaling(GfxState *state) { /* printf("updateHorizScaling\n"); */ } // found in some CA9 ops
   virtual void updateTextPos(GfxState *state) { /* printf("->(%f,%f)\n",state->getCurY(),state->getCurX()); */ }
   virtual void updateTextShift(GfxState *state, double shift) { /* printf("updateTextShift(%f)\n",shift / -100.0); */ }
 
@@ -193,6 +196,7 @@ private:
   GooList header;
   GooList body;
   GooList footnotes;
+  GooList repeats;
 
   int pageNum;
   int _pages;

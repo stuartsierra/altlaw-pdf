@@ -79,10 +79,6 @@ pdftotext_SOURCES =				\
 
 altlaw_parse_pdf_SOURCES =			\
 	altlaw_parse_pdf.cc			\
-	HtmlFonts.cc				\
-	HtmlFonts.h				\
-	HtmlLinks.cc				\
-	HtmlLinks.h				\
 	Altlaw.cc				\
 	Altlaw.h				\
 	$(common)

@@ -82,7 +82,6 @@ AltString::AltString(GooString *s, int page,
   _fontSize = fontSize;
   _bold = bold;
   _italics = italics;
-
 }
 
 AltLine::AltLine() {
@@ -128,6 +127,27 @@ GBool AltlawDoc::looksLikeBody(AltLine *line) {
 
  }
 
+GBool AltLine::isBold() {
+  for(int i=0; i<s->getLength(); i++) {
+    if(!((AltString *)(s->get(i)))->bold()) {
+      /* if (i > 0)
+        printf("not bold: '%s'\n", ((AltString *)(s->get(i)))->getCString());; */
+      return gFalse;
+    }
+  }
+  return gTrue;
+
+}
+
+GBool AltLine::looksLikeSectionHeading() {
+
+  if (this->isBold())
+    return gTrue;
+  else
+    return gFalse;
+
+}
+
 // Should this be in AltlawDoc:: ?
 GBool AltLine::looksLikeFootnote() {
 
@@ -155,6 +175,10 @@ void AltlawDoc::drawString(GfxState *state, GooString *s) {
 
   font = state->getFont();
 
+  char *fontname = font->getName()->lowerCase()->getCString();
+  GBool bold = font->isBold() or strstr(fontname,"bold");
+  GBool italic = font->isItalic() or strstr(fontname,"italic") or strstr(fontname,"oblique");
+
   dx = dy = 0;
   p = s->getCString();
   len = s->getLength();
@@ -174,10 +198,13 @@ void AltlawDoc::drawString(GfxState *state, GooString *s) {
 	  break;
 	case(0x93):
 	case(0x94):
+	case(0xAA):
+	case(0xBA):
 	  s->setChar(pos, '"');
 	  break;
 	case(0x96):
 	case(0x97):
+	case(0xD0):
 	  s->setChar(pos, '-');
 	  break;
 	case(0xA7):
@@ -190,6 +217,11 @@ void AltlawDoc::drawString(GfxState *state, GooString *s) {
 	  break;
         case(0xBD):
 	  s->setChar(pos, '+');
+	  break;
+	case(0xFC): // these are weird brackets that sometimes get used on docket sheets
+	case(0xFD):
+	case(0xFE):
+	  s->del(pos);
 	  break;
       }
       p = s->getCString() + s->getLength() - len;
@@ -218,7 +250,7 @@ void AltlawDoc::drawString(GfxState *state, GooString *s) {
   state->transformDelta(tdx,tdy,&dx,&dy);
   strings.append(new AltString(s,pageNum,tx,ty,dx,dy,
   				state->getFontSize(),
-				font->isBold(),font->isItalic()));
+				bold,italic));
   //printf("(%.1f,%.1f)+(%.1f,%.1f)\t'%s'\n",ty,tx,dy,dx,s->getCString());
 }
 
@@ -344,10 +376,10 @@ GBool AltlawDoc::isRepeatedLine(AltLine *line) {
 void AltlawDoc::print() {
   AltString *last;
 
-  // header first
-  printf("<div id=\"header\"><pre>\n");
-  for(int i=0; i < header.getLength(); i++) {
-    AltLine *l = (AltLine *)(header.get(i));
+  // log ignored repeats in a comment
+  printf("<!-- these lines looked like repeats and were skipped:\n");
+  for(int i=0; i < repeats.getLength(); i++) {
+    AltLine *l = (AltLine *)(repeats.get(i));
     for(int j=0; j < l->strings()->getLength(); j++) {
       AltString *s = (AltString *)(l->strings()->get(j));
       if (j > 0 && fabs(s->X() - (last->X() + last->dX())) > 1.0 )
@@ -357,7 +389,23 @@ void AltlawDoc::print() {
     }
     printf("\n");
   }
-  printf("</pre></div>\n\n");
+  printf("-->\n");
+
+  // header
+  printf("<div id=\"header\">\n");
+  for(int i=0; i < header.getLength(); i++) {
+    AltLine *l = (AltLine *)(header.get(i));
+    printf("<p class=\"header\">");
+    for(int j=0; j < l->strings()->getLength(); j++) {
+      AltString *s = (AltString *)(l->strings()->get(j));
+      if (j > 0 && fabs(s->X() - (last->X() + last->dX())) > 1.0 )
+        printf(" ");
+      printf("%s", s->getCString());
+      last = s;
+    }
+    printf("</p>\n");
+  }
+  printf("</div>\n\n");
 
   // body
   printf("<div id=\"body\">\n");
@@ -366,11 +414,18 @@ void AltlawDoc::print() {
 
     // markup paragraphs
     switch(l->type()) {
+      case(SectionHeading):
+        printf("<p class=\"heading\">\n"); // would be nice to include the tab depth
+	break;
       case(Body):
         printf("<p class=\"unknown\">");
 	break;
       case(PStart):
         printf("<p class=\"body\">\n");
+	break;
+      case(Paragraph):
+        if ((i == 0) or ((((AltLine *)(body.get(i-1)))->type() != Paragraph) and ((AltLine *)(body.get(i-1)))->type() != PStart))
+          printf("<p class=\"body-notab\">\n");
 	break;
 
       // only 1 blockquote type, so need to check if this is the first
@@ -389,15 +444,20 @@ void AltlawDoc::print() {
     printf("\n");
 
     // end paragraphs when necessary
-    if (l->type() == Body)
-      printf("</p>\n");
-    else if (l->type() == PEnd)
-      printf("</p>\n");
-    else if ((l->type() == BlockQuote) and (i == body.getLength() or (((AltLine *)(body.get(i+1)))->type() != BlockQuote)))
-      printf("</p>\n");
+    switch(l->type()) {
+      case(Body):
+      case(SectionHeading):
+      case(PEnd):
+        printf("</p>\n");
+	break;
+      case(Paragraph):
+      case(BlockQuote):
+        if ((i+1) == body.getLength() or (((AltLine *)(body.get(i+1)))->type() != l->type()))
+          printf("</p>\n");
+	break;
+    }
   }
   printf("</div>\n\n");
-
 
   // footnotes
   printf("<div id=\"footnotes\">\n");
@@ -408,13 +468,16 @@ void AltlawDoc::print() {
     if (l->looksLikeFootnote()) {
       if (i != 0)
         printf("</p>\n");
-      printf("<p id=\"footnoteX\">\n");
+      printf("<p id=\"fn%s\">\n",((AltString *)(l->strings()->get(0)))->getCString());
     }
     for(int j=0; j < l->strings()->getLength(); j++) {
       AltString *s = (AltString *)(l->strings()->get(j));
       if (j > 0 && fabs(s->X() - (last->X() + last->dX())) > 1.0 )
         printf(" ");
-      printf("%s", s->getCString());
+      if(j == 0 and l->looksLikeFootnote())
+        printf("<sup>%s</sup> ",s->getCString());
+      else
+        printf("%s", s->getCString());
       last = s;
     }
     printf("\n");
@@ -492,8 +555,10 @@ void AltlawDoc::parse() {
     next = (i+1 < lines.getLength()) ? (AltLine *)lines.get(i+1) : NULL;
 
     // Repeated - like Headers / Footers
-    if (this->isRepeatedLine(line) )
+    if (this->isRepeatedLine(line) ) {
       line->setType(Repeat);
+      repeats.append(line);
+    }
 
     // Footnotes
     else if (line->looksLikeFootnote()) {
@@ -523,14 +588,14 @@ void AltlawDoc::parse() {
       }
     }
     else {
-      if (!this->onLeftMargin(line) and ((next and (line->X() == next->X())) or (last and (line->X() == last->X())) ) )
+      if (line->looksLikeSectionHeading())
+        line->setType(SectionHeading);
+      else if (!this->onLeftMargin(line) and ((next and (line->X() == next->X())) or (last and last->type() == BlockQuote and (line->X() == last->X())) ) )
         line->setType(BlockQuote);
       else if (this->onTabStop(line,1) and this->onRightMargin(line))
         line->setType(PStart);
-      else if (this->onLeftMargin(line) and this->onRightMargin(line))
+      else if (this->onLeftMargin(line) and (this->onRightMargin(line) or (last and ((last->type() == Paragraph) or (last->type() == BlockQuote)))))
         line->setType(Paragraph);
-      else if (this->onLeftMargin(line) and last->type() == Paragraph) // **implied !onRightMargin
-        line->setType(PEnd);
     
       body.append(line);
     }
@@ -566,7 +631,8 @@ GBool AltlawDoc::onRightMargin(AltLine *line) {
 }
 
 GBool AltlawDoc::onTabStop(AltLine *line, int tab) {
-  if (fabs(line->X() - min_x - (tab * 50.0)) < 1.0) return gTrue;
+  double tabstop = 50.0;
+  if (fabs(line->X() - min_x - (tab * tabstop)) < (0.5 * tabstop)) return gTrue;
   else return gFalse;
 }
 
