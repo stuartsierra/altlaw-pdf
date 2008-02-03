@@ -28,36 +28,125 @@
 class GfxState;
 class GooString;
 
+class AltlawDoc;
+class AltLine;
+class AltWord;
+class AltString;
+
+class AltDataPoint {
+  public:
+    AltDataPoint() { count = 0; };
+    AltDataPoint(double d) { data = d; count = 1; };
+    ~AltDataPoint() {};
+
+    double data;
+    int count;
+
+};
+
+static int DataCmp(const void *ptr1, const void *ptr2) {
+  AltDataPoint* d1 = *((AltDataPoint**) ptr1);
+  AltDataPoint* d2 = *((AltDataPoint**) ptr2);
+  double diff = d1->data - d2->data;
+  double epsilon = 0.05;
+
+  return diff >= epsilon ? 1 : diff <= -epsilon ? -1 : 0;
+
+};
+
+static int CountCmp(const void *ptr1, const void *ptr2) {
+  AltDataPoint* d1 = *((AltDataPoint**) ptr1);
+  AltDataPoint* d2 = *((AltDataPoint**) ptr2);
+
+  return d1->count > d2->count ? 1 : d1->count < d2->count ? -1 : 0;
+
+};
+
+/* AltString */
 class AltString: public GooString {
   public:
   AltString(GooString *s, int page,
-  			double x, double y,
-  			double dx, double dy,
-			double fontSize,
-			GBool bold, GBool italics);
+  			double x1, double y1, double x2, double y2, double yDraw,
+			GfxFont *font, double fontSize, GBool bold, GBool italics);
+  AltString(AltString* s);
+  AltString() { _page = 0; _x1 = _y1 = _x2 = _y2 = _yDraw = _fontSize = 0.0; _bold = _italics = gFalse; _font = NULL; };
   ~AltString() {};
 
   // acts like cmp(str, arg)
-  int cmpPYX(int page, double y, double x,
-  		double fudgeY = ALTFUDGEY,
-		double fudgeX = ALTFUDGEX );
+  int cmpPYX(int page, double x1, double y1, double x2, double y2);
   GBool isNum();
   GBool similar(AltString *str);
+  double yOverlap(AltString *str) { return this->yOverlap(str->_y1,str->_y2); };
+  double yOverlap(double y1, double y2);
+  GBool looksLikeFootnote(double lineY, double lineFont);
+
+  void print();
 
   int page() { return _page; };
-  double X() { return _x; };
-  double Y() { return _y; };
-  double dX() { return _dx; };
-  double dY() { return _dy; };
+  double X() { return _x1; };
+  double Y() { return _yDraw; };
+  double dX() { return _x2 - _x1; };
+  double yMin() { return _y1; };
+  double yMax() { return _y2; };
+  GfxFont *font() { return _font; };
   double fontSize() { return _fontSize; };
   GBool bold() { return _bold; };
   GBool italics() { return _italics; };
 
-  private:
+  protected:
   int _page;
-  double _x,_y,_dx,_dy,_fontSize;
+  double _x1,_y1,_x2,_y2,_yDraw;
+  double _fontSize;
+  GfxFont *_font;
   GBool _bold,_italics;
 
+  friend class AltLine;
+};
+
+static int Xsorter(const void *ptr1, const void *ptr2) {
+  AltString *s1 = *((AltString **) ptr1);
+  AltString *s2 = *((AltString **) ptr2);
+  return s1->X() > s2->X() ? 1 : s1->X() < s2->X() ? -1 : 0;
+};
+
+static int PYXsorter(const void *ptr1, const void *ptr2) {
+  AltString *s1;
+  AltString *s2;
+  s1 = *((AltString**) ptr1);
+  s2 = *((AltString**) ptr2);
+  return s1->cmpPYX(s2->page(),s2->X(),s2->yMin(),s2->X()+s2->dX(),s2->yMax());
+};
+
+#define NUM_CAPS_TYPES 5
+enum CapMode {
+  CAPS_LOWER,
+  CAPS_FIRST,
+  CAPS_UPPER,
+  CAPS_NOALPHA,
+  CAPS_UNKNOWN
+};
+
+class AltWord: public AltString  {
+  public:
+  AltWord(double x1, double y1, double x2, double y2);
+  AltWord(AltString *s);
+  ~AltWord() {};
+
+  void print();
+
+  GBool hasAlpha();
+  GBool isUpper();
+  GBool isLower();
+  GBool isFirstCap();
+  CapMode capMode();
+
+  GBool sup;
+  int numChars;
+
+  static char* _lower;
+  static char* _upper;
+
+  friend class AltLine;
 };
 
 enum AltLineType {
@@ -76,11 +165,21 @@ enum AltLineType {
 
 class AltLine {
   public:
-  AltLine();
-  ~AltLine() { delete s; };
+  AltLine(AltlawDoc *doc);
+  ~AltLine() {
+    deleteGooList(_strings, AltString);
+    deleteGooList(_words, AltWord);
+  };
 
-  GooList *strings() { return s; };
   void add(AltString *str);
+  void parseWords();
+  void sort() { _strings->sort(Xsorter); }
+
+  void print();
+
+  GooList *strings() { return _strings; };
+  GooList *words() { return _words; };
+
   GBool looksLikeFootnote();
   GBool looksLikeSectionHeading();
   GBool isBold();
@@ -96,21 +195,29 @@ class AltLine {
   double height() { return _dy; };
   double fontSize() { return _fontSize; };
   int chars() { return _chars; };
+  void calcFeatures();
 
   private:
-  GooList *s;
+  AltlawDoc *_doc;
+  GooList *_strings;
+  GooList *_words;
   int _page, _chars;
   double _x,_y,_dx,_dy,_fontSize;
   AltLineType _type;
 
-};
+  /* features */
+  CapMode capMode; /* 0 = no capitals; 1 = First letter cap'd; 2 = all caps */
+  double avgWordHeight;
+  double avgCharWidth;
+  double normAvgWordHeight;
+  double normAvgCharWidth;
+  double align;
+  double vertPos;
+  int lineId;
+  double prevDistance;
+  double nextDistance;
+  int wordCount;
 
-static int sorter(const void *ptr1, const void *ptr2) {
-  AltString *s1;
-  AltString *s2;
-  s1 = *((AltString**) ptr1);
-  s2 = *((AltString**) ptr2);
-  return s1->cmpPYX(s2->page(),s2->Y(),s2->X());
 };
 
 //------------------------------------------------------------------------
@@ -123,7 +230,7 @@ public:
   AltlawDoc(PDFDoc *pdf);
   virtual ~AltlawDoc();
 
-  void sort() { strings.sort(sorter); }
+  void sort() { strings.sort(PYXsorter); }
   AltString* getStringAt(int page, double y, double x,
   		double fudgeY = ALTFUDGEY,
 		double fudgeX = ALTFUDGEX );
@@ -136,6 +243,8 @@ public:
   void print();
   void parse();
   int pages() { return _pages; };
+  double pageHeight() { return _pageHeight; };
+  double pageWidth() { return _pageWidth; };
 
   // Check if file was successfully created.
   virtual GBool isOk() { return gTrue; }
@@ -198,11 +307,16 @@ private:
   GooList footnotes;
   GooList repeats;
 
+  double _pageHeight, _pageWidth;
+
   int pageNum;
   int _pages;
-  double min_x;
-  double max_x;
-  int max_chars;
+  double leftMargin;
+  double rightMargin;
+
+  // stats to help us parse
+  double tab_x;
+  double linespace_y;
 
 };
 

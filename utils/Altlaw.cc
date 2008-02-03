@@ -30,9 +30,7 @@
 AltlawDoc::AltlawDoc(PDFDoc *pdf) {
   pageNum = -1;
   _pages = 0;
-  min_x = 1100.0;
-  max_x = 0.0;
-  max_chars = 0;
+  _pageHeight = _pageWidth = 0.0;
 
   // let's get down to bizness
   pdf->displayPages(this, 1, pdf->getNumPages(), 100, 100, 0,gTrue, gFalse, gFalse);
@@ -49,6 +47,8 @@ void AltlawDoc::startPage(int pg, GfxState *state) {
   // we'll just set _pages to the largest page num processed
   _pages = pageNum > _pages ? pageNum : _pages;
   //printf("AltlawDoc::startPage(%d, state);\n",pageNum);
+  if(!_pageHeight) _pageHeight = state->getPageHeight();
+  if(!_pageWidth)  _pageWidth  = state->getPageWidth();
 } 
 
 
@@ -70,22 +70,56 @@ void AltlawDoc::endString(GfxState *state) {
 }
 
 AltString::AltString(GooString *s, int page,
-			double x, double y,
-			double dx, double dy,
-			double fontSize,
-			GBool bold, GBool italics) : GooString(s) {
+			double x1, double y1, double x2, double y2, double yDraw,
+			GfxFont *font, double fontSize, GBool bold, GBool italics) : GooString(s) {
   _page = page;
-  _x = x;
-  _y = y;
-  _dx = dx;
-  _dy = dy;
+  _x1 = x1;
+  _y1 = y1;
+  _x2 = x2;
+  _y2 = y2;
+  _yDraw = yDraw;
+  _font = font;
   _fontSize = fontSize;
   _bold = bold;
   _italics = italics;
 }
 
-AltLine::AltLine() {
-  s = new GooList();
+AltString::AltString(AltString *s) : GooString(s) {
+  _page = s->_page;
+  _x1 = s->_x1;
+  _y1 = s->_y1;
+  _x2 = s->_x2;
+  _y2 = s->_y2;
+  _yDraw = s->_yDraw;
+  _font = s->_font;
+  _fontSize = s->_fontSize;
+  _bold = s->_bold;
+  _italics = s->_italics;
+}
+
+AltWord::AltWord(double x1, double y1, double x2, double y2) : AltString() {
+  _x1 = x1;
+  _y1 = y1;
+  _x2 = x2;
+  _y2 = y2;
+
+  // this is arbitrary, but we'll set yDraw just to be complete
+  _yDraw = y1;
+
+  sup = _bold = _italics = gFalse;
+  numChars = -1;
+}
+
+AltWord::AltWord(AltString *s) : AltString(s) {
+  sup = gFalse;
+  numChars = -1;
+
+}
+
+AltLine::AltLine(AltlawDoc *doc) {
+  _doc = doc;
+  _strings = new GooList();
+  _words = new GooList();
   _x = _y = _dx = _dy = _fontSize = 0.0;
   _page = -1;
   _type = null;
@@ -95,19 +129,18 @@ AltLine::AltLine() {
 // Add another string to the end of the line
 void AltLine::add(AltString *str) {
   // add it to the list
-  s->append(str);
+  _strings->append(str);
 
   // update our line variables
   _chars += str->getLength();
   _dx += str->dX(); // this isn't going to be completely accurate with implied spaces
-  _dy += str->dY();
 
   // use the largest fontSize / Y val of all strings (perhaps the mode/median/mean would be better?)
   _y = str->Y() > _y ? str->Y() : _y;
   _fontSize = str->fontSize() > _fontSize ? str->fontSize() : _fontSize;
 
   // set line vals with first string
-  if (s->getLength() == 1) {
+  if (_strings->getLength() == 1) {
     _page = str->page();
     _x = str->X();
     _y = str->Y();
@@ -116,20 +149,216 @@ void AltLine::add(AltString *str) {
 
 }
 
+int max(int vals[], int size) {
+  int _max = 0;
+  for(int i=0; i<size; i++)
+    if( vals[_max] < vals[i] )
+      _max = i;
+
+  return _max;
+}
+
+double max(double vals[], int size) {
+  int _max = 0;
+  for(int i=0; i<size; i++)
+    if( vals[_max] < vals[i] )
+      _max = i;
+
+  return _max;
+}
+
+char* AltWord::_lower = "abcdefghijklmnopqrstuvwxyz";
+char* AltWord::_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+GBool AltWord::hasAlpha() {
+  if (strpbrk(this->getCString(), _lower) or strpbrk(this->getCString(), _upper))
+    return gTrue;
+  else
+    return gFalse;
+}
+
+GBool AltWord::isUpper() {
+  if (strpbrk(this->getCString(), _upper) and !strpbrk(this->getCString(), _lower))
+    return gTrue;
+  else
+    return gFalse;
+}
+
+GBool AltWord::isLower() {
+  if (strpbrk(this->getCString(), _lower) and !strpbrk(this->getCString(), _upper))
+    return gTrue;
+  else
+    return gFalse;
+}
+
+GBool AltWord::isFirstCap() {
+  GooString *w = this->copy();
+  char *upp = strpbrk(this->getCString(), _upper);
+  char *low = strpbrk(this->getCString(), _lower);
+
+  if(upp and (!low or upp < low))
+    return gTrue;
+  else
+    return gFalse;
+}
+
+CapMode AltWord::capMode() {
+
+    // no alphas
+    if (!this->hasAlpha())
+      return CAPS_NOALPHA;
+
+    // all caps
+    else if (this->isUpper())
+      return CAPS_UPPER;
+
+    // no caps
+    else if (this->isLower())
+      return CAPS_LOWER;
+
+    // first caps
+    else if (this->isFirstCap())
+      return CAPS_FIRST;
+
+    // caps in the middle ??
+    else {
+      printf("WeirdCaps: '%s'\n",this->getCString());
+      return CAPS_UNKNOWN; // skip this one
+    }
+
+
+}
+
+void AltLine::calcFeatures() {
+
+  // word-based features
+  int _caps[NUM_CAPS_TYPES] = {0};
+  double _wh = 0.0; // word height
+  double _cw = 0.0; // char width
+  int _chars = 0;   // number of chars
+  for(int i=0; i<_words->getLength(); i++) {
+    AltWord *w = (AltWord *)_words->get(i);
+
+    _caps[w->capMode()]++;
+    _wh += w->fontSize();
+    _cw += w->_x2 - w->_x1;
+    _chars += w->getLength();
+  }
+
+  wordCount = _words->getLength();
+
+  capMode = (CapMode) max(_caps, 4);
+
+  avgWordHeight = _wh / (double) wordCount;
+  avgCharWidth  = _cw / (double) _chars;
+
+  align = this->X() / (_doc->pageWidth() - this->rightX());
+  vertPos = this->Y() / _doc->pageHeight();
+
+
+/*
+  double normAvgWordHeight; // wait for all lines
+  double normAvgCharWidth;  // wait for all lines
+  int lineId;
+  double prevDistance;
+  double nextDistance;
+*/
+
+}
+
+void AltLine::parseWords() {
+  deleteGooList(_words, AltWord);
+  _words = new GooList();
+  AltString *last = NULL;
+  AltWord *w = NULL;
+
+  // assume _strings is sorted
+  for(int i=0; i<_strings->getLength(); i++) {
+    AltString *s = (AltString *)(_strings->get(i));
+    if (!w or !w->getLength()) {
+      w = new AltWord(s);
+      w->clear();
+    }
+
+    // if there is a large space, start a new word
+    if (i > 0 && fabs(s->_x1 - last->_x2) > 1.0 ) {
+      if(w->getLength()) {
+        _words->append(w);
+        w = new AltWord(s);
+        w->clear();
+      }
+    }
+
+    // if this looks like a footnote, start a new word
+    if(s->looksLikeFootnote(this->Y(), this->fontSize())) {
+      if(w->getLength()) {
+        _words->append(w);
+        w = new AltWord(s);
+        w->clear();
+      }
+      w->sup = gTrue;
+    }
+
+    char *str = s->getCString();
+    
+    // if we find a space, start a new word
+    while(char *pch = strchr(str,' ')) {
+
+      // calculate delta X
+      // HACK - b/c I don't feel like using getNextChar
+      double dx = s->dX() * ((double)(pch - s->getCString()) / (double)(s->getLength()));
+
+      if (pch-str) {
+        // append pre-space string
+        w->append(str,pch-str);
+        // add delta to existing word if the space is mid-string
+        w->_x2 = s->_x1 + dx;
+      }
+
+
+      // start new word
+      if(w->getLength()) {
+        _words->append(w);
+        w = new AltWord(s);
+        w->clear();
+      }
+      w->_x1 = s->_x1 + dx;
+      w->_x2 = s->_x2;
+
+      // advance pointer to look for next space
+      str = pch+1;
+    }
+
+    // ok, now add the (remaining) string to our word
+//    w->append(str,s->getLength() - (str - s->getCString()));
+    w->append(str);
+    w->_x2 = s->_x2;
+    last = s;
+
+  }
+
+  // handle last string in list
+  if(w->getLength()) _words->append(w);
+
+}
+
 GBool AltlawDoc::looksLikeBody(AltLine *line) {
+
+  if (this->onRightMargin(line) and line->X() < ((rightMargin + leftMargin) / 2)) return gTrue;
+  else return gFalse;
 
   if (this->onLeftMargin(line) and this->onRightMargin(line)) return gTrue;
   if (this->onTabStop(line,1) and this->onRightMargin(line)) return gTrue;
 
   // just in case tab is not = 50.0, which is hardcoded in onTabStop right now
-  if (line->X() - min_x < 100.0 and this->onRightMargin(line)) return gTrue;
+  if (line->X() - leftMargin < 100.0 and this->onRightMargin(line)) return gTrue;
   return gFalse;
 
  }
 
 GBool AltLine::isBold() {
-  for(int i=0; i<s->getLength(); i++) {
-    if(!((AltString *)(s->get(i)))->bold()) {
+  for(int i=0; i<_strings->getLength(); i++) {
+    if(!((AltString *)(_strings->get(i)))->bold()) {
       /* if (i > 0)
         printf("not bold: '%s'\n", ((AltString *)(s->get(i)))->getCString());; */
       return gFalse;
@@ -148,28 +377,30 @@ GBool AltLine::looksLikeSectionHeading() {
 
 }
 
+GBool AltString::looksLikeFootnote(double lineY, double lineFont) {
+  int n = 0;
+  char c = this->getChar(0);
+  if (c >= '0' and c <= '9') n+=3;
+  if (c == '*') n+=3;
+  if (this->Y() < lineY) n++;
+  if (this->fontSize() < lineFont) n++;
+  if (this->bold()) n++;
+  if (this->italics()) n++;
+  if (n >= 5) return gTrue;
+  else return gFalse;
+}
+
 // Should this be in AltlawDoc:: ?
 GBool AltLine::looksLikeFootnote() {
-
-  int n = 0;
-  AltString *str = (AltString *)(s->get(0));
-  char c = str->getChar(0);
-  if (c >= '0' and c <= '9') n++;
-  if (c == '*') n++;
-  if (str->Y() < _y) n++;
-  if (str->fontSize() < _fontSize) n++;
-  if (str->bold()) n++;
-  if (str->italics()) n++;
-  if (n >= 3) return gTrue;
-  else return gFalse;
-
+  return ((AltString *)(_strings->get(0)))->looksLikeFootnote(this->Y(), this->fontSize());
 }
 
 void AltlawDoc::drawString(GfxState *state, GooString *s) {
   GfxFont *font;
   CharCode code;
   Unicode u[8];
-  double x, y, tx, ty, dx, dy, dx2, dy2, tdx, tdy, originX, originY;
+  double x, y, tx, ty, dx, dx_char, tdx, yMin, yMax;
+  double dy, tdy, ox, oy; /* these are useless unless in vertical mode */
   char *p;
   int len, n, uLen, nChars, nSpaces, i;
 
@@ -183,52 +414,12 @@ void AltlawDoc::drawString(GfxState *state, GooString *s) {
   p = s->getCString();
   len = s->getLength();
   nChars = nSpaces = 0;
-  // calc raw (dx,dy), chars, and spaces
+  // calc raw dx, chars, and spaces
   while (len > 0) {
     n = font->getNextChar(p, len, &code,
 			    u, (int)(sizeof(u) / sizeof(Unicode)), &uLen,
-			    &dx2, &dy2, &originX, &originY);
-    // do a quick check for non ascii chars
-    if (code > 0x7F) {
-      int pos = s->getLength() - len;
-      switch(code) {
-        case(0x91):
-        case(0x92):
-	  s->setChar(pos, '\'');
-	  break;
-	case(0x93):
-	case(0x94):
-	case(0xAA):
-	case(0xBA):
-	  s->setChar(pos, '"');
-	  break;
-	case(0x96):
-	case(0x97):
-	case(0xD0):
-	  s->setChar(pos, '-');
-	  break;
-	case(0xA7):
-	  s->del(pos);
-	  s->insert(pos, "&sect;");
-	  break;
-	case(0xB6):
-	  s->del(pos);
-	  s->insert(pos, "&para;");
-	  break;
-        case(0xBD):
-	  s->setChar(pos, '+');
-	  break;
-	case(0xFC): // these are weird brackets that sometimes get used on docket sheets
-	case(0xFD):
-	case(0xFE):
-	  s->del(pos);
-	  break;
-      }
-      p = s->getCString() + s->getLength() - len;
-    }
-
-    dx += dx2;
-    dy += dy2;
+			    &dx_char, &dy, &ox, &oy);
+    dx += dx_char;
     if (n == 1 && *p == ' ') {
 	++nSpaces;
     }
@@ -242,30 +433,37 @@ void AltlawDoc::drawString(GfxState *state, GooString *s) {
 	   + nChars * state->getCharSpace()
 	   + nSpaces * state->getWordSpace();
   dx *= state->getHorizScaling();
-  dy *= state->getFontSize();
 
   // apply Transform Matrix
   state->textTransformDelta(dx, dy, &tdx, &tdy);
-  state->transform(state->getCurX(),state->getCurY(),&tx,&ty);
   state->transformDelta(tdx,tdy,&dx,&dy);
-  strings.append(new AltString(s,pageNum,tx,ty,dx,dy,
-  				state->getFontSize(),
-				bold,italic));
-  //printf("(%.1f,%.1f)+(%.1f,%.1f)\t'%s'\n",ty,tx,dy,dx,s->getCString());
+  state->transform(state->getCurX(),state->getCurY(),&tx,&ty);
+  //state->transform(state->getCurY() - (font->getAscent() * state->getFontSize()),
+  //		state->getCurY() - (font->getDescent() * state->getFontSize()),
+  //		&yMin,&yMax);
+  yMin = ty - font->getAscent()  * state->getTransformedFontSize();
+  yMax = ty - font->getDescent() * state->getTransformedFontSize();
+
+  strings.append(new AltString(s,pageNum,
+  				tx,yMin, tx+dx,yMax, ty,
+  				font,state->getTransformedFontSize(),bold,italic));
 }
 
 // Figure out where the string is in relation to the page/y/x coords given
-int AltString::cmpPYX(int page, double y, double x,
-			double fudgeY, double fudgeX ) {
+int AltString::cmpPYX(int page, double x1, double y1, double x2, double y2) {
+
+  double x_mid = (x1 + x2) / 2.0;
 
   return
     _page > page ?  1 :
     _page < page ? -1 :
-    _y > ( y + fudgeY ) ?  1 :
-    _y < ( y - fudgeY ) ? -1 :
-    _x > ( x + fudgeX ) ?  1 :
-    _x < ( x - fudgeX ) ? -1 :
-     0;
+
+    this->yOverlap(y1,y2) > 0.33 * _fontSize ? (
+      _x1 >= x2 ?  1 :
+      _x2 <= x1 ? -1 :
+    0 ) :
+
+    (y2 - _y1) < (_y2 - y1) ? 1 : -1;
 }
 
 // used when looking for repeated strings
@@ -292,6 +490,16 @@ GBool AltString::isNum() {
       return res; // we're done b/c we found non-digit
 
   }
+  return gFalse;
+}
+
+double AltString::yOverlap(double y1, double y2) {
+
+  double diff1 = y2 - this->_y1;
+  double diff2 = this->_y2 - y1;
+
+  return diff1 < diff2 ? diff1 : diff2;
+
 }
 
 AltString* AltlawDoc::getStringAt(int page, double y, double x,
@@ -303,7 +511,7 @@ AltString* AltlawDoc::getStringAt(int page, double y, double x,
   while (p1 < p2) {
     guess = p1 + (p2 - p1)/2;
     str = (AltString *)(strings.get(guess));
-    if (str->cmpPYX(page,y,x,fudgeY,fudgeX) <= 0 )
+    if (str->cmpPYX(page,x,y,x+fudgeX,y+fudgeY) <= 0 )
       p1 = guess + 1;
     else
       //can't be high = mid-1: here A[mid] >= value,
@@ -311,7 +519,7 @@ AltString* AltlawDoc::getStringAt(int page, double y, double x,
       p2 = guess; 
   }
 
-  if (p1 < strings.getLength() and str->cmpPYX(page,y,x,fudgeY,fudgeX) == 0 ) {
+  if (p1 < strings.getLength() and str->cmpPYX(page,x,y,x+fudgeX,y+fudgeY) == 0 ) {
     return str; // found
   }
   else
@@ -373,20 +581,99 @@ GBool AltlawDoc::isRepeatedLine(AltLine *line) {
 }
 
 // print out nice html
+void printCString(char *s, int len) {
+
+  for(int i=0; i<len; i++) {
+    CharCode c = (CharCode)(*(s+i) & 0xff);
+
+    // check for non ascii chars
+    if (c > 0x7F) {
+      switch(c) {
+        case(0x91):
+        case(0x92):
+	  printf("'");
+	  break;
+	case(0x93):
+	case(0x94):
+	case(0xAA):
+	case(0xBA):
+	  printf("\"");
+	  break;
+	case(0x96):
+	case(0x97):
+	case(0xAD):
+	case(0xD0):
+	  printf("-");
+	  break;
+	case(0xA7):
+	  printf("&sect;");
+	  break;
+	case(0xB6):
+	  printf("&para;");
+	  break;
+        case(0xBD):
+	  printf("+");
+	  break;
+	case(0xFC):
+	case(0xFD):
+	case(0xFE):
+	  // ignore - these are weird brackets that show up occasionally
+	  break;
+      }
+
+    } else { printf("%c",c); }
+  }
+}
+
+void AltString::print() {
+  //printf("(%.0f,%.0f)",this->X(),this->dX());
+  printCString(this->getCString(), this->getLength());
+}
+
+void AltWord::print() {
+  printf("<WORD coords=\"%.0f,%.0f,%.0f,%.0f\" caps=\"%d\" font=\"%.1f\">",_x1,_y1,_x2,_y2,this->capMode(),this->fontSize());
+  if(this->sup) printf("<sup>");
+  printCString(this->getCString(), this->getLength());
+  if(this->sup) printf("</sup>");
+  printf("</WORD>\n");
+}
+
+void AltLine::print() {
+  printf("<LINE type=\"%d\" caps=\"%d\" avgWordHeight=\"%.1f\" avgCharWidth=\"%.1f\" align=\"%.2f\" vertPos=\"%.2f\" words=\"%d\">\n",
+  	this->type(), this->capMode, this->avgWordHeight, this->avgCharWidth, this->align, this->vertPos, this->wordCount);
+  // for(int j=0; j < this->strings()->getLength(); j++)
+  //  ((AltString*)(this->strings()->get(j)))->print();
+  //printf("\n");
+  for(int j=0; j < this->words()->getLength(); j++) {
+    AltWord *w = (AltWord *)(this->words()->get(j));
+    //if (j != 0 and not w->sup) printf(" ");
+    w->print();
+  }
+  printf("</LINE>\n");
+
+/*
+  AltString *last = NULL;
+  for(int j=0; j < this->strings()->getLength(); j++) {
+    AltString *s = (AltString *)(this->strings()->get(j));
+    if (j > 0 && fabs(s->X() - (last->X() + last->dX())) > 1.0 )
+      printf(" ");
+    if (j == 0 and this->looksLikeFootnote()) {
+      printf("<sup>");
+      s->print();
+      printf("</sup>");
+    } else { s->print(); }
+    last = s;
+  }
+*/
+}
+
 void AltlawDoc::print() {
-  AltString *last;
+  AltString *last = NULL;
 
   // log ignored repeats in a comment
   printf("<!-- these lines looked like repeats and were skipped:\n");
   for(int i=0; i < repeats.getLength(); i++) {
-    AltLine *l = (AltLine *)(repeats.get(i));
-    for(int j=0; j < l->strings()->getLength(); j++) {
-      AltString *s = (AltString *)(l->strings()->get(j));
-      if (j > 0 && fabs(s->X() - (last->X() + last->dX())) > 1.0 )
-        printf(" ");
-      printf("%s", s->getCString());
-      last = s;
-    }
+    ((AltLine *)(repeats.get(i)))->print();
     printf("\n");
   }
   printf("-->\n");
@@ -394,15 +681,8 @@ void AltlawDoc::print() {
   // header
   printf("<div id=\"header\">\n");
   for(int i=0; i < header.getLength(); i++) {
-    AltLine *l = (AltLine *)(header.get(i));
     printf("<p class=\"header\">");
-    for(int j=0; j < l->strings()->getLength(); j++) {
-      AltString *s = (AltString *)(l->strings()->get(j));
-      if (j > 0 && fabs(s->X() - (last->X() + last->dX())) > 1.0 )
-        printf(" ");
-      printf("%s", s->getCString());
-      last = s;
-    }
+    ((AltLine *)(header.get(i)))->print();
     printf("</p>\n");
   }
   printf("</div>\n\n");
@@ -433,14 +713,10 @@ void AltlawDoc::print() {
         if ((i == 0) or (((AltLine *)(body.get(i-1)))->type() != BlockQuote))
           printf("<p class=\"blockquote\">\n");
 	break;
+      default:
+        break;
     }
-    for(int j=0; j < l->strings()->getLength(); j++) {
-      AltString *s = (AltString *)(l->strings()->get(j));
-      if (j > 0 && fabs(s->X() - (last->X() + last->dX())) > 1.0 )
-        printf(" ");
-      printf("%s", s->getCString());
-      last = s;
-    }
+    l->print();
     printf("\n");
 
     // end paragraphs when necessary
@@ -455,6 +731,8 @@ void AltlawDoc::print() {
         if ((i+1) == body.getLength() or (((AltLine *)(body.get(i+1)))->type() != l->type()))
           printf("</p>\n");
 	break;
+      default:
+        break;
     }
   }
   printf("</div>\n\n");
@@ -470,6 +748,9 @@ void AltlawDoc::print() {
         printf("</p>\n");
       printf("<p id=\"fn%s\">\n",((AltString *)(l->strings()->get(0)))->getCString());
     }
+    //printf("<!-- (%.1f,%.1f) -->",l->Y(),l->X());
+    l->print();
+    /*
     for(int j=0; j < l->strings()->getLength(); j++) {
       AltString *s = (AltString *)(l->strings()->get(j));
       if (j > 0 && fabs(s->X() - (last->X() + last->dX())) > 1.0 )
@@ -480,6 +761,7 @@ void AltlawDoc::print() {
         printf("%s", s->getCString());
       last = s;
     }
+    */
     printf("\n");
   }
   // close last footnote (if there were some)
@@ -508,36 +790,121 @@ void AltlawDoc::print() {
   */
 }
 
+static int dblsrt(const void *ptr1, const void *ptr2) {
+  double *d1 = *((double**) ptr1);
+  double *d2 = *((double**) ptr2);
+  return d1 > d2 ? 1 : d1 == d2 ? 0 : -1; 
+}
+
 void AltlawDoc::parse() {
 
   // Sort strings by Page, Y, X
   this->sort();
 
   // Group strings into Lines
-  double y = -99; // this is the y of the last line
+  double y1 = 0.0;
+  double y2 = 0.0;
   AltLine *line = NULL;
   AltString *s = NULL;
   for(int i=0; i<strings.getLength(); i++) {
     s = (AltString *)(strings.get(i));
 
     // need to modify to deal with close but not equal
-    if (fabs(s->Y() - y) > ALTFUDGEY) {
-
-      // process completed line
-      // calc min_x and max_chars as we go - avoid full scan later...
-      if (line) {
-        if (line->X() < min_x) min_x = line->X();
-        if (line->rightX() > max_x) max_x = line->rightX();
-        if (line->chars() > max_chars) max_chars = line->chars();
-      }
+    if (s->yOverlap(y1,y2) <= 0.33 * s->fontSize()) {
 
       // start a new line
-      y = s->Y();
-      line = new AltLine();
+      y1 = s->yMin();
+      y2 = s->yMax();
+      line = new AltLine(this);
       lines.append(line);
+    } else {
+      // lets make sure we want to 
     }
     line->add(s);
   }
+  for(int i=0; i<lines.getLength(); i++) {
+    line = (AltLine *)(lines.get(i));
+    line->sort();
+    line->parseWords();
+    line->calcFeatures();
+  }
+
+  // Figure out line spacing / tabs / etc
+
+  // right margin
+  GooList *xlist = new GooList();
+
+  for(int i=0; i<lines.getLength(); i++)
+    xlist->append(new AltDataPoint(((AltLine *)(lines.get(i)))->rightX()));
+
+  xlist->sort(DataCmp);
+
+  // Let's use the Median (equal number of values higher and lower)
+  rightMargin = ((AltDataPoint *)(xlist->get(xlist->getLength() / 2)))->data;
+  //printf("len: %d, median: %d\n",xlist->getLength(), xlist->getLength() / 2);
+  printf("right margin: %.1f\n",rightMargin);
+
+  // ok, now left margin
+  deleteGooList(xlist, AltDataPoint);
+  xlist = new GooList();
+
+  for(int i=0; i<lines.getLength(); i++)
+    xlist->append(new AltDataPoint(((AltLine *)(lines.get(i)))->X()));
+
+  xlist->sort(DataCmp);
+
+  // Let's use the Mode (value that occurs the most)
+  AltDataPoint *keeper = (AltDataPoint *)(xlist->get(xlist->getLength() - 1));
+  for(int i=xlist->getLength() - 2; i>=0; i--) { // start with second to last and work forwards
+    AltDataPoint *d = (AltDataPoint *)(xlist->get(i));
+
+    if (DataCmp(&keeper,&d) == 0) {
+      keeper->count++;
+      xlist->del(i);
+    } else { keeper = d; }
+
+  }
+  xlist->sort(CountCmp);
+
+  // this sets the LeftMargin to the Mode of all line X vals
+  leftMargin = ((AltDataPoint *)(xlist->get(xlist->getLength() - 1)))->data;
+  printf("left margin: %.1f\n",leftMargin);
+
+  /*
+  for(int i=0;i<xlist->getLength();i++) {
+    AltDataPoint *d = (AltDataPoint *)(xlist->get(i));
+    printf("%.1f %d\n", d->data, d->count);
+  }
+  */
+
+  GooList *ylist = new GooList();
+  AltLine* lastline = (AltLine *)(lines.get(0));
+  for(int i=1; i<lines.getLength(); i++) {
+    AltLine* l = (AltLine *)(lines.get(i));
+    ylist->append(new AltDataPoint(l->Y() - lastline->Y()));
+    lastline = l;
+  }
+
+  ylist->sort(DataCmp);
+
+  keeper = (AltDataPoint *)(ylist->get(ylist->getLength() - 1));
+  for(int i=ylist->getLength() - 2; i>0; i--) { // start with second to last and work forwards
+    AltDataPoint *d = (AltDataPoint *)(ylist->get(i));
+
+    if (DataCmp(&keeper,&d) == 0) {
+      keeper->count++;
+      ylist->del(i);
+    } else { keeper = d; }
+  }
+
+  ylist->sort(CountCmp);
+
+  /*
+  for(int i=0;i<ylist->getLength();i++) {
+    AltDataPoint *d = (AltDataPoint *)(ylist->get(i));
+    printf("%.1f %d\n", d->data, d->count);
+  }
+  */
 
 
   // Try to figure out line types
@@ -621,18 +988,18 @@ void AltlawDoc::parse() {
 }
 
 GBool AltlawDoc::onLeftMargin(AltLine *line) {
-  if (fabs(line->X() - min_x) < 1.0) return gTrue;
+  if (fabs(line->X() - leftMargin) < 1.0) return gTrue;
   else return gFalse;
 }
 
 GBool AltlawDoc::onRightMargin(AltLine *line) {
-  if ((line->rightX() / max_x) >= 0.80) return gTrue;
+  if ((rightMargin - line->rightX()) < (0.02 * (rightMargin - leftMargin))) return gTrue;
   else return gFalse;
 }
 
 GBool AltlawDoc::onTabStop(AltLine *line, int tab) {
   double tabstop = 50.0;
-  if (fabs(line->X() - min_x - (tab * tabstop)) < (0.5 * tabstop)) return gTrue;
+  if (fabs(line->X() - leftMargin - (tab * tabstop)) < (0.5 * tabstop)) return gTrue;
   else return gFalse;
 }
 
