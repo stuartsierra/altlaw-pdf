@@ -62,6 +62,15 @@ static int CountCmp(const void *ptr1, const void *ptr2) {
 
 };
 
+#define NUM_CAPS_TYPES 5
+enum CapMode {
+  CAPS_LOWER,
+  CAPS_FIRST,
+  CAPS_UPPER,
+  CAPS_NOALPHA,
+  CAPS_UNKNOWN
+};
+
 /* AltString */
 class AltString: public GooString {
   public:
@@ -69,18 +78,27 @@ class AltString: public GooString {
   			double x1, double y1, double x2, double y2, double yDraw,
 			GfxFont *font, double fontSize, GBool bold, GBool italics);
   AltString(AltString* s);
-  AltString() { _page = 0; _x1 = _y1 = _x2 = _y2 = _yDraw = _fontSize = 0.0; _bold = _italics = gFalse; _font = NULL; };
+  AltString() { _page = 0; _x1 = _y1 = _x2 = _y2 = _yDraw = _fontSize = _overlap = 0.0; _bold = _italics = _underline = gFalse; _font = NULL; };
   ~AltString() {};
 
   // acts like cmp(str, arg)
   int cmpPYX(int page, double x1, double y1, double x2, double y2);
   GBool isNum();
-  GBool similar(AltString *str);
   double yOverlap(AltString *str) { return this->yOverlap(str->_y1,str->_y2); };
   double yOverlap(double y1, double y2);
+  GBool looksSimilar(AltString *str);
   GBool looksLikeFootnote(double lineY, double lineFont);
 
-  void print();
+  GBool hasAlpha();
+  GBool isUpper();
+  GBool isLower();
+  GBool isFirstCap();
+  CapMode capMode();
+
+  static char* _lower;
+  static char* _upper;
+
+  void print(GBool full=gTrue);
 
   int page() { return _page; };
   double X() { return _x1; };
@@ -92,15 +110,17 @@ class AltString: public GooString {
   double fontSize() { return _fontSize; };
   GBool bold() { return _bold; };
   GBool italics() { return _italics; };
+  GBool underline() { return _underline; };
 
   protected:
   int _page;
-  double _x1,_y1,_x2,_y2,_yDraw;
+  double _x1,_y1,_x2,_y2,_yDraw,_overlap;
   double _fontSize;
   GfxFont *_font;
-  GBool _bold,_italics;
+  GBool _bold,_italics,_underline;
 
   friend class AltLine;
+  friend class AltlawDoc;
 };
 
 static int Xsorter(const void *ptr1, const void *ptr2) {
@@ -117,34 +137,18 @@ static int PYXsorter(const void *ptr1, const void *ptr2) {
   return s1->cmpPYX(s2->page(),s2->X(),s2->yMin(),s2->X()+s2->dX(),s2->yMax());
 };
 
-#define NUM_CAPS_TYPES 5
-enum CapMode {
-  CAPS_LOWER,
-  CAPS_FIRST,
-  CAPS_UPPER,
-  CAPS_NOALPHA,
-  CAPS_UNKNOWN
-};
-
 class AltWord: public AltString  {
   public:
   AltWord(double x1, double y1, double x2, double y2);
   AltWord(AltString *s);
   ~AltWord() {};
 
-  void print();
-
-  GBool hasAlpha();
-  GBool isUpper();
-  GBool isLower();
-  GBool isFirstCap();
-  CapMode capMode();
+  void print(GBool full=gTrue);
 
   GBool sup;
   int numChars;
 
-  static char* _lower;
-  static char* _upper;
+  AltLine *_line;
 
   friend class AltLine;
 };
@@ -156,11 +160,15 @@ enum AltLineType {
   Repeat,
   Unknown,
   null,
-  PStart,
+  Pstart,
   Paragraph,
-  PEnd,
+  Pend,
   BlockQuote,
-  SectionHeading
+  SectionHeading,
+  Separator,
+  BQstart,
+  BQend,
+  Psingle,
 };
 
 class AltLine {
@@ -172,14 +180,17 @@ class AltLine {
   };
 
   void add(AltString *str);
+  void chomp();
+  AltWord* startNewWord(AltString *str);
   void parseWords();
   void sort() { _strings->sort(Xsorter); }
 
-  void print();
+  void print(GBool full=gTrue);
 
   GooList *strings() { return _strings; };
   GooList *words() { return _words; };
 
+  GBool match(char *str);
   GBool looksLikeFootnote();
   GBool looksLikeSectionHeading();
   GBool isBold();
@@ -197,6 +208,23 @@ class AltLine {
   int chars() { return _chars; };
   void calcFeatures();
 
+  /* features */
+  CapMode capMode;
+  double avgWordHeight;
+  double avgCharWidth;
+  double normAvgWordHeight;
+  double normAvgCharWidth;
+  double align;
+  double vertPos;
+  int pageLineId;
+  int docLineId;
+  int pageLines;
+  int docLines;
+  double prevDistance;
+  double nextDistance;
+  int wordCount;
+  double normLength;
+
   private:
   AltlawDoc *_doc;
   GooList *_strings;
@@ -204,19 +232,6 @@ class AltLine {
   int _page, _chars;
   double _x,_y,_dx,_dy,_fontSize;
   AltLineType _type;
-
-  /* features */
-  CapMode capMode; /* 0 = no capitals; 1 = First letter cap'd; 2 = all caps */
-  double avgWordHeight;
-  double avgCharWidth;
-  double normAvgWordHeight;
-  double normAvgCharWidth;
-  double align;
-  double vertPos;
-  int lineId;
-  double prevDistance;
-  double nextDistance;
-  int wordCount;
 
 };
 
@@ -231,20 +246,29 @@ public:
   virtual ~AltlawDoc();
 
   void sort() { strings.sort(PYXsorter); }
-  AltString* getStringAt(int page, double y, double x,
-  		double fudgeY = ALTFUDGEY,
-		double fudgeX = ALTFUDGEX );
-  GBool isRepeatedStr( AltString *str );
+  void print(GBool full=gFalse);
+
+  void parse();
+  void calcFeatures();
+  void normalizeLineFeatures();
+  void calcLineTypes();
+  int findOpinionStart();
+
+  void addUnderline(int page, double x1, double y1, double x2, double y2);
+  AltWord* getWordAt(int page, double x1, double y1, double x2, double y2);
+
+  GBool isRepeatedWord( AltWord *word );
   GBool isRepeatedLine( AltLine *line );
   GBool looksLikeBody( AltLine *line);
   GBool onLeftMargin( AltLine *line );
   GBool onRightMargin( AltLine *line );
   GBool onTabStop( AltLine *line, int tab );
-  void print();
-  void parse();
+
   int pages() { return _pages; };
   double pageHeight() { return _pageHeight; };
   double pageWidth() { return _pageWidth; };
+  double leftMargin() { return _leftMargin; };
+  double rightMargin() { return _rightMargin; };
 
   // Check if file was successfully created.
   virtual GBool isOk() { return gTrue; }
@@ -298,9 +322,14 @@ public:
   virtual void drawImage(GfxState *state, Object *ref, Stream *str,
 			  int width, int height, GfxImageColorMap *colorMap,
 			 int *maskColors, GBool inlineImg);
+  virtual void stroke(GfxState * /*state*/);
+  virtual void fill(GfxState * /*state*/);
+  virtual void eoFill(GfxState * /*state*/);
 
 private:
   GooList strings;		// list of all strings we get
+  GooList underlines;		// track drawn lines during render - will merge with words during parse
+  GooList words;
   GooList lines;		// grouped into lines
   GooList header;
   GooList body;
@@ -311,8 +340,8 @@ private:
 
   int pageNum;
   int _pages;
-  double leftMargin;
-  double rightMargin;
+  double _leftMargin;
+  double _rightMargin;
 
   // stats to help us parse
   double tab_x;

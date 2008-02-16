@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
   AL = new AltlawDoc(doc);
 
   // print it out
-  AL->print();
+  AL->print(gFalse);
 
   delete AL;
 
