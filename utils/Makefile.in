@@ -37,8 +37,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = pdffonts$(EXEEXT) pdfimages$(EXEEXT) pdfinfo$(EXEEXT) \
-	pdftops$(EXEEXT) pdftotext$(EXEEXT) pdftohtml$(EXEEXT) \
-	$(am__EXEEXT_1) $(am__EXEEXT_2)
+	pdftops$(EXEEXT) pdftotext$(EXEEXT) altlaw_parse_pdf$(EXEEXT) \
+	pdftohtml$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2)
 subdir = utils
 DIST_COMMON = $(dist_man1_MANS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -58,10 +58,16 @@ am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(man1dir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am__objects_1 = parseargs.$(OBJEXT)
+am_altlaw_parse_pdf_OBJECTS = altlaw_parse_pdf.$(OBJEXT) \
+	Altlaw.$(OBJEXT) $(am__objects_1)
+altlaw_parse_pdf_OBJECTS = $(am_altlaw_parse_pdf_OBJECTS)
+altlaw_parse_pdf_LDADD = $(LDADD)
+am__DEPENDENCIES_1 =
+altlaw_parse_pdf_DEPENDENCIES = $(top_builddir)/poppler/libpoppler.la \
+	$(am__DEPENDENCIES_1)
 am_pdffonts_OBJECTS = pdffonts.$(OBJEXT) $(am__objects_1)
 pdffonts_OBJECTS = $(am_pdffonts_OBJECTS)
 pdffonts_LDADD = $(LDADD)
-am__DEPENDENCIES_1 =
 pdffonts_DEPENDENCIES = $(top_builddir)/poppler/libpoppler.la \
 	$(am__DEPENDENCIES_1)
 am_pdfimages_OBJECTS = pdfimages.$(OBJEXT) ImageOutputDev.$(OBJEXT) \
@@ -124,13 +130,15 @@ LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(pdffonts_SOURCES) $(pdfimages_SOURCES) $(pdfinfo_SOURCES) \
-	$(pdftoabw_SOURCES) $(pdftohtml_SOURCES) $(pdftoppm_SOURCES) \
-	$(pdftops_SOURCES) $(pdftotext_SOURCES)
-DIST_SOURCES = $(pdffonts_SOURCES) $(pdfimages_SOURCES) \
-	$(pdfinfo_SOURCES) $(am__pdftoabw_SOURCES_DIST) \
-	$(pdftohtml_SOURCES) $(am__pdftoppm_SOURCES_DIST) \
-	$(pdftops_SOURCES) $(pdftotext_SOURCES)
+SOURCES = $(altlaw_parse_pdf_SOURCES) $(pdffonts_SOURCES) \
+	$(pdfimages_SOURCES) $(pdfinfo_SOURCES) $(pdftoabw_SOURCES) \
+	$(pdftohtml_SOURCES) $(pdftoppm_SOURCES) $(pdftops_SOURCES) \
+	$(pdftotext_SOURCES)
+DIST_SOURCES = $(altlaw_parse_pdf_SOURCES) $(pdffonts_SOURCES) \
+	$(pdfimages_SOURCES) $(pdfinfo_SOURCES) \
+	$(am__pdftoabw_SOURCES_DIST) $(pdftohtml_SOURCES) \
+	$(am__pdftoppm_SOURCES_DIST) $(pdftops_SOURCES) \
+	$(pdftotext_SOURCES)
 man1dir = $(mandir)/man1
 NROFF = nroff
 MANS = $(dist_man1_MANS)
@@ -357,6 +365,12 @@ pdftotext_SOURCES = \
 	pdftotext.cc				\
 	$(common)
 
+altlaw_parse_pdf_SOURCES = \
+	altlaw_parse_pdf.cc			\
+	Altlaw.cc				\
+	Altlaw.h				\
+	$(common)
+
 pdftohtml_SOURCES = \
 	pdftohtml.cc				\
 	HtmlFonts.cc				\
@@ -432,6 +446,9 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+altlaw_parse_pdf$(EXEEXT): $(altlaw_parse_pdf_OBJECTS) $(altlaw_parse_pdf_DEPENDENCIES) 
+	@rm -f altlaw_parse_pdf$(EXEEXT)
+	$(CXXLINK) $(altlaw_parse_pdf_LDFLAGS) $(altlaw_parse_pdf_OBJECTS) $(altlaw_parse_pdf_LDADD) $(LIBS)
 pdffonts$(EXEEXT): $(pdffonts_OBJECTS) $(pdffonts_DEPENDENCIES) 
 	@rm -f pdffonts$(EXEEXT)
 	$(CXXLINK) $(pdffonts_LDFLAGS) $(pdffonts_OBJECTS) $(pdffonts_LDADD) $(LIBS)
@@ -463,10 +480,12 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Altlaw.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HtmlFonts.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HtmlLinks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HtmlOutputDev.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ImageOutputDev.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/altlaw_parse_pdf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parseargs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdffonts.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdfimages.Po@am__quote@
