@@ -1222,21 +1222,7 @@ void AltlawDoc::print(GBool full) {
   }
 
   // header
-  printf("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
-  printf("<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">\n");
-  printf("  <head>\n");
-  printf("    <title></title>\n");
-  printf("    <meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\"/>\n");
-  printf("    <meta name=\"description\" content=\"Transformed by Public.Resource.Org, Inc., at Mon, 11 Feb 2008 02:11:24 GMT\"/>\n");
-  printf("    <link rel=\"stylesheet\" type=\"text/css\" href=\"http://bulk.resource.org/courts.gov/c/css/case.css\"/>\n");
-  printf("    <link rel=\"stylesheet\" type=\"text/css\" href=\"http://bulk.resource.org/courts.gov/c/css/print.css\" media=\"print\"/>\n");
-  printf("  </head>\n");
-  printf("  <body>\n");
-  printf("<p class=\"case_cite\"></p>\n");
-  printf("<p class=\"parties\"></p>\n");
-  printf("<p class=\"docket\"></p>\n");
-  printf("<p class=\"court\"></p>\n");
-  printf("<p class=\"date\"></p>\n");
+  printf("<div class=\"prohtml\">");
   printf("<div class=\"prelims\">");
 
   for(int i=0; i < header.getLength(); i++)
@@ -1262,7 +1248,7 @@ void AltlawDoc::print(GBool full) {
     if (!next or next->looksLikeFootnote())
       printf("</p>\n");
   }
-  printf("</div>\n\n");
+  printf("</div></div>\n\n");
 
 }
 
